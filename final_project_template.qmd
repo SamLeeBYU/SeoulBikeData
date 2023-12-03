@@ -38,7 +38,8 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
     IsAutumn = Seasons == "Autumn",
     IsSummer = Seasons == "Summer",
     IsWinter = Seasons == "Winter",
-    IsSpring = Seasons == "Spring"
+    IsSpring = Seasons == "Spring",
+    Hour010 = Hour %in%
   )
 ```
 
@@ -68,6 +69,8 @@ For each question of interest listed in Section 2, describe what regression mode
 
 Conduct the analysis in a logical fashion, including necessary code (and not any superfluous code) and its output.  Give simple interpretations of your findings related to the questions of interest.
 
+Took out Dew Point Temp
+
 ```{r}
 seoul.numeric.factors = c("RentedBikeCount", "Hour",            "Temperature", "Humidity",        "WindSpeed",       "Visibility",     "DewPointTemp", "SolarRadiation", "Rainfall", "Snowfall", "IsHoliday", "IsFunctioningDay",
                           "IsWinter", "IsSpring", "IsSummer", "IsAutumn")
@@ -83,7 +86,7 @@ ggpairs(seoul[seoul.numeric.factors])
 corrplot(cor(seoul[seoul.numeric.factors]), type = "upper")
 
 seoul %>% ggplot()+
-  geom_point(aes(x=Date, y=RentedBikeCount, color=Temperature))+
+  geom_point(aes(x=Hour, y=Temperature))+
   facet_grid(~Seasons)
 
 
@@ -93,9 +96,75 @@ seoul %>% ggplot()+
 seoul %>% ggplot()+
   geom_boxplot(aes(x=Holiday, y=RentedBikeCount))
 
-corrplot(cor(seoul[c("RentedBikeCount", str_c("SolarXIs", seasons), str_c("Is", seasons))]), type="upper")
+corrplot(cor(seoul[c("Temperature", str_c("SolarXIs", seasons), str_c("Is", seasons))]), type="upper")
+```
+```{r}
+seoul_lm <- lm(Temperature ~ Hour + Humidity + Visibility + WindSpeed + SolarRadiation + Rainfall + Snowfall + IsSummer + IsWinter + IsSpring , data = seoul)
+
+summary(seoul_lm)
+
+seoul$residuals <- seoul_lm$residuals
+```
+```{r}
+resid_vs_hour <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = Hour, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_humidity <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = Humidity, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_windspeed <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = WindSpeed, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_visibility <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = Visibility, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_solarradiation <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = SolarRadiation, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_rainfall <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = Rainfall, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_snowfall <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = Snowfall, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_issummer <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = IsSummer, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_iswinter <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = IsWinter, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_isspring <- ggplot(data = seoul) +
+  geom_point(mapping = aes(x = IsSpring, y = residuals)) +
+  theme(aspect.ratio = 1)
+
+resid_vs_hour
+resid_vs_humidity
+resid_vs_windspeed
+resid_vs_visibility
+resid_vs_solarradiation
+resid_vs_rainfall
+resid_vs_snowfall
+resid_vs_issummer
+resid_vs_iswinter
+resid_vs_isspring
+```
+```{r}
+avPlots(seoul_lm)
 ```
 
+```{r}
+autoplot(seoul_lm) + 
+  theme(aspect.ratio = 1)
+```
 # 3 Conclusions
 
 Give additional context to you results and interpretations from Section 5 with respect to the data set and its purpose.  Describe any potential weaknesses in your analysis, and how they may affect the reliability of the results.
