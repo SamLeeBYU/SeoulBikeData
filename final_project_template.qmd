@@ -20,6 +20,11 @@ text-align: center;
 ```{r setup, include=FALSE}
 library(tidyverse)
 library(lubridate)
+library(GGally)
+library(corrplot)
+library(patchwork)
+library(car)
+library(ggfortify)
 
 seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
   c("Date", "RentedBikeCount", "Hour", "Temperature", "Humidity", "WindSpeed",
@@ -27,7 +32,13 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
     "Seasons", "Holiday", "FunctioningDay")
 ) %>% as_tibble() %>%
   mutate(
-    Date = dmy(Date)
+    Date = dmy(Date),
+    IsHoliday = Holiday == "Holiday",
+    IsFunctioningDay = FunctioningDay == "Yes",
+    IsAutumn = Seasons == "Autumn",
+    IsSummer = Seasons == "Summer",
+    IsWinter = Seasons == "Winter",
+    IsSpring = Seasons == "Spring"
   )
 ```
 
@@ -58,7 +69,31 @@ For each question of interest listed in Section 2, describe what regression mode
 Conduct the analysis in a logical fashion, including necessary code (and not any superfluous code) and its output.  Give simple interpretations of your findings related to the questions of interest.
 
 ```{r}
+seoul.numeric.factors = c("RentedBikeCount", "Hour",            "Temperature", "Humidity",        "WindSpeed",       "Visibility",     "DewPointTemp", "SolarRadiation", "Rainfall", "Snowfall", "IsHoliday", "IsFunctioningDay",
+                          "IsWinter", "IsSpring", "IsSummer", "IsAutumn")
 
+seasons = c("Winter", "Spring", "Summer", "Autumn")
+for(season in seasons){
+  seoul[str_c("SolarX", str_c("Is", season))] = seoul[str_c("Is", season)]*seoul$SolarRadiation
+}
+```
+
+```{r message=FALSE}
+ggpairs(seoul[seoul.numeric.factors])
+corrplot(cor(seoul[seoul.numeric.factors]), type = "upper")
+
+seoul %>% ggplot()+
+  geom_point(aes(x=Date, y=RentedBikeCount, color=Temperature))+
+  facet_grid(~Seasons)
+
+
+seoul %>% ggplot()+
+  geom_boxplot(aes(x=Seasons, y=RentedBikeCount))
+
+seoul %>% ggplot()+
+  geom_boxplot(aes(x=Holiday, y=RentedBikeCount))
+
+corrplot(cor(seoul[c("RentedBikeCount", str_c("SolarXIs", seasons), str_c("Is", seasons))]), type="upper")
 ```
 
 # 3 Conclusions
