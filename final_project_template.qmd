@@ -28,6 +28,7 @@ library(car)
 library(ggfortify)
 library(alr4)
 library(glmnet)
+library(robustbase)
 set.seed(12022023)
 
 seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
@@ -37,17 +38,18 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
 ) %>% as_tibble() %>%
   mutate(
     Date = dmy(Date),
-    IsAutumn = Seasons == "Autumn",
-    IsSummer = Seasons == "Summer",
-    IsWinter = Seasons == "Winter",
-    IsSpring = Seasons == "Spring",
+    Time = ymd_h(paste(Date, Hour)),
+    IsAutumn = as.numeric(Seasons == "Autumn"),
+    IsSummer = as.numeric(Seasons == "Summer"),
+    IsWinter = as.numeric(Seasons == "Winter"),
+    IsSpring = as.numeric(Seasons == "Spring"),
+    IsHoliday = as.numeric(Holiday == "Holiday"),
+    IsFunctioningDay = as.numeric(FunctioningDay == "Yes"),
     Hour09 = Hour %in% 0:9,
     Hour1015 = Hour %in% 10:15,
     Hour1624 = Hour %in% 16:24,
-    TempChange = Temperature-lag(Temperature, n=1)
-  )
-
-seoul = seoul[2:nrow(seoul),]
+    RentedBikeCount = log(RentedBikeCount+1)
+  ) %>% arrange(Time)
 ```
 
 # Abstract
@@ -76,115 +78,371 @@ For each question of interest listed in Section 2, describe what regression mode
 
 Conduct the analysis in a logical fashion, including necessary code (and not any superfluous code) and its output. Give simple interpretations of your findings related to the questions of interest.
 
-Took out Dew Point Temp
-
 ```{r}
-seoul.factors = c("TempChange", "Hour09", "Hour1015", "Hour1624", "Humidity",
+seasons = unique(seoul$Seasons)
+Temp = seoul[c("Time", "Temperature", "Seasons")]
+
+season.base = "IsSpring"
+season.dummies = setdiff(c("IsWinter", "IsSpring", "IsSummer", "IsAutumn"), season.base)
+
+time.base = "Hour1624"
+time.dummies = setdiff(c("Hour09", "Hour1015"), time.base)
+
+time.bike = c()
+for(h in unique(seoul$Hour)){
+  factor = str_c("Hour", h)
+  seoul[factor] = as.numeric(seoul$Hour == h)
+  time.bike = c(time.bike, factor)
+}
+time.bike.base = "Hour0"
+time.bike = setdiff(time.bike, time.bike.base)
+
+seoul.factors = c("Temperature", "Humidity", "DewPointTemp",
                   "WindSpeed", "Visibility", "SolarRadiation", "Rainfall",
-                  "Snowfall", "IsWinter", "IsSpring", "IsSummer", "IsAutumn")
+                  "Snowfall", time.dummies)
+
+bike.dummies = c("IsHoliday", "IsFunctioningDay")
+seoul.bike.factors = c("RentedBikeCount", "Humidity", "Temperature",
+                       "WindSpeed", "Visibility", "DewPointTemp", "SolarRadiation",
+                       "Rainfall", "Snowfall", bike.dummies, time.bike, season.dummies)
+
+seoul.change = c()
+
+for(factor in seoul.factors){
+  change_factor = str_c(factor, "Change")
+  seoul.change = c(seoul.change, change_factor)
+  seoul[change_factor] = NA_real_
+  for(s in seasons){
+    seoul.subset = seoul %>% filter(Seasons == s)
+    seoul[seoul$Seasons == s, change_factor] = seoul.subset[factor]-lag(seoul.subset[factor], n=1)
+  }
+}
 
 seoul.interaction = c()
-seoul.base = c("Hour1624", "IsAutumn", "SolarXIsAutumn")
+seoul.bike.interaction = c()
 
-seasons = c("Winter", "Spring", "Summer", "Autumn")
+seoul.base = c(time.base)
+seoul.bike.base = c(time.bike.base)
 
-
-for(season in seasons){
-  factor = str_c("SolarX", str_c("Is", season))
-  seoul[factor] = seoul[str_c("Is", season)]*seoul$SolarRadiation
-  seoul.factors = c(seoul.factors, factor)
+#All 2d Interaction Effects
+continuous_interactions = combn(setdiff(seoul.change, 
+                                        c(str_c(time.dummies, "Change"),
+                                          str_c(season.dummies, "Change"),
+                                          "TemperatureChange")), 2)
+for(i in 1:ncol(continuous_interactions)){
+  factor = paste(continuous_interactions[,i], collapse = "X")
   seoul.interaction = c(seoul.interaction, factor)
+  seoul[factor] = NA_real_
+  for(s in seasons){
+    seoul.subset = seoul %>% filter(Seasons == s)
+    seoul[seoul$Seasons == s, factor] = seoul.subset[continuous_interactions[1,i]]*
+                                        seoul.subset[continuous_interactions[2,i]]
+  }
 }
 
-hours = c("Hour09", "Hour1015")
-for(hour in hours){
-  factor = str_c("SolarX", hour)
-  seoul.factors = c(seoul.factors, factor)
-  seoul[factor] = seoul$SolarRadiation*seoul[hour]
-  seoul.interaction = c(seoul.interaction, factor)
+continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
+                                        c(time.bike, season.dummies,
+                                          "RentedBikeCount")), 2)
+for(i in 1:ncol(continuous_interactions_bike)){
+  factor = paste(continuous_interactions_bike[,i], collapse = "X")
+  seoul.bike.interaction = c(seoul.bike.interaction, factor)
+  seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
+                  seoul[continuous_interactions_bike[2,i]]
 }
+
+#Time Interaction Effects
+for(factor in setdiff(seoul.change, 
+                      c(str_c(time.dummies, "Change"),
+                        "TemperatureChange"))){
+  for(time in str_c(time.dummies, "Change")){
+    factor.interaction = str_c(factor, "X", time)
+    seoul.interaction = c(seoul.interaction, factor.interaction)
+    seoul[factor.interaction] = NA_real_
+    for(s in seasons){
+      seoul.subset = seoul %>% filter(Seasons == s)
+      seoul[seoul$Seasons == s, factor.interaction] = seoul.subset[factor]*
+                                                      seoul.subset[time]
+    }
+  }
+}
+
+for(factor in setdiff(seoul.bike.factors,
+                        c(time.bike, season.dummies, "RentedBikeCount"))){
+  for(time in time.bike){
+    factor.interaction = str_c(factor, "X", time)
+    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
+    seoul[factor.interaction] = seoul[factor]*seoul[time]
+  }
+}
+
+#Seasonal Interactions
+for(factor in setdiff(seoul.bike.factors,
+                        c(season.dummies, "RentedBikeCount"))){
+  for(s in season.dummies){
+    factor.interaction = str_c(factor, "X", s)
+    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
+    seoul[factor.interaction] = seoul[factor]*seoul[s]
+  }
+}
+
+seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
 
-```{r message=FALSE}
-ggpairs(seoul[seoul.factors])
-corrplot(cor(seoul[seoul.factors]), type = "upper")
+```{r message=FALSE, fig.width=8}
+corrplot(cor(seoul[seoul.bike.factors]), type = "upper")
+corrplot(cor(seoul.temp[seoul.change]), type="upper")
 
-seoul %>% ggplot()+
-  geom_point(aes(x=Hour, y=TempChange))+
+seoul.temp %>% ggplot()+
+  geom_point(aes(x=Hour, y=TemperatureChange))+
   facet_grid(~Seasons)
 
-corrplot(cor(seoul[c("TempChange", str_c("SolarXIs", seasons), str_c("Is", seasons))]), type="upper")
+threshold = 0
+seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
+  geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip))+
+  facet_grid(~Seasons)
+
+seoul.temp %>% ggplot()+
+  geom_boxplot((aes(y=TemperatureChange, x=Seasons)))
+
+seoul.temp %>% ggplot()+
+  geom_point(aes(x=DewPointTempChange, y=TemperatureChange))+
+  facet_grid(Hour09+Hour1015~Seasons)
 ```
 
 ```{r}
-seoul.lm <- lm(TempChange ~ ., data = seoul[setdiff(seoul.factors, c(seoul.interaction, seoul.base))])
+# create_season_models = function(factors, response, base=F){
+#   factors = setdiff(factors, response)
+#   if(base == T){
+#     f = 0
+#   } else {
+#     f = paste(c(0, factors), collapse = " + ")
+#   }
+#   
+#   models <- map(unique(seoul$Seasons), function(x){
+#     lm(formula(paste(response, "~", f)), 
+#        data = seoul[seoul$Seasons == x,] %>% 
+#          select(all_of(c(factors, response))))
+#   })
+#   
+#   names(models) <- str_c("seoul.lm.", unique(seoul$Seasons))
+#   return(models)
+# }
+# 
+# models.lm = create_season_models(seoul.change, "TemperatureChange")
+# 
+# for(model in models.lm){
+#   print(summary(model))
+# }
 
+seoul.lm = lm(TemperatureChange ~ 0 + ., data=seoul.temp[seoul.change])
 summary(seoul.lm)
 
-seoul$residuals <- seoul.lm$residuals
+seoul.bike.lm = lm(RentedBikeCount ~ ., data=seoul[seoul.bike.factors])
+summary(seoul.bike.lm)
 ```
 
-```{r}
-
-```
-
-```{r}
+```{r message=F}
 avPlots(seoul.lm)
+avPlots(seoul.bike.lm)
 ```
 
-```{r}
-autoplot(seoul.lm) + 
+```{r figsize=12}
+autoplot(seoul.lm) +
+  theme(aspect.ratio = 1)
+
+autoplot(seoul.bike.lm) +
   theme(aspect.ratio = 1)
 ```
 
 ```{r}
-cd_cont_pos <- function(leverage, level, model) {
-  sqrt(level * length(coef(model)) * (1 - leverage) / leverage)
-}
-cd_cont_neg <- function(leverage, level, model) {
-  -cd_cont_pos(leverage, level, model)
+show_leverage = function(model){
+  cd_cont_pos <- function(leverage, level, model) {
+    sqrt(level * length(coef(model)) * (1 - leverage) / leverage)
+  }
+  cd_cont_neg <- function(leverage, level, model) {
+    -cd_cont_pos(leverage, level, model)
+  }
+  
+  cd_threshold <- 0.5
+  cd_threshold2 <- 4 / (nrow(seoul) - 2)
+  x_max_val <- 0.35
+  
+  autoplot(model, which = 5, nrow = 1, ncol = 1) +
+    theme(aspect.ratio = 1) +
+    stat_function(fun = cd_cont_pos,
+                  args = list(level = cd_threshold, model = model),
+                  xlim = c(0, x_max_val), lty = 2, colour = "#FFACEE") +
+    stat_function(fun = cd_cont_neg,
+                  args = list(level = cd_threshold, model = model),
+                  xlim = c(0, x_max_val), lty = 2, colour = "#FFACEE") +
+    stat_function(fun = cd_cont_pos,
+                  args = list(level = cd_threshold2, model = model),
+                  xlim = c(0, x_max_val), lty = 2, colour = "#AFDFFF") +
+    stat_function(fun = cd_cont_neg,
+                  args = list(level = cd_threshold2, model = model),
+                  xlim = c(0, x_max_val), lty = 2, colour = "#AFDFFF")
 }
 
-cd_threshold <- 0.5
-cd_threshold2 <- 4 / (nrow(seoul) - 2)
-x_max_val <- 0.35
-
-autoplot(seoul.lm, which = 5, nrow = 1, ncol = 1) +
-  theme(aspect.ratio = 1) +
-  stat_function(fun = cd_cont_pos,
-                args = list(level = cd_threshold, model = seoul.lm),
-                xlim = c(0, x_max_val), lty = 2, colour = "#FFACEE") +
-  stat_function(fun = cd_cont_neg,
-                args = list(level = cd_threshold, model = seoul.lm),
-                xlim = c(0, x_max_val), lty = 2, colour = "#FFACEE") +
-  stat_function(fun = cd_cont_pos,
-                args = list(level = cd_threshold2, model = seoul.lm),
-                xlim = c(0, x_max_val), lty = 2, colour = "#AFDFFF") +
-  stat_function(fun = cd_cont_neg,
-                args = list(level = cd_threshold2, model = seoul.lm),
-                xlim = c(0, x_max_val), lty = 2, colour = "#AFDFFF")
+show_leverage(seoul.lm)
+show_leverage(seoul.bike.lm)
 ```
 
 ```{r}
-t = seoul %>% filter(Rainfall > 0)
+model.factors = setdiff(c(seoul.change, seoul.interaction), c(seoul.base, "TemperatureChange"))
+
+seoul.x = as.matrix(seoul.temp[model.factors])
+seoul.y = as.matrix(seoul.temp["TemperatureChange"])
+
+lasso_cv <- cv.glmnet(x = seoul.x,
+                      y = seoul.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
+lasso.factors = model.factors[which(d != 0)]
+seoul.lasso = lm(TemperatureChange ~ 0 + .,
+                                       seoul.temp[c("TemperatureChange",
+                                       lasso.factors)])
+
+print(summary(seoul.lasso))
+
+singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
+                  "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
+                  "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
+                  "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
+                  "SnowfallXIsAutumn", "IsFunctioningDayXIsWinter", "IsFunctioningDayXIsSummer")
+model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
+                             c(seoul.bike.base, "RentedBikeCount", singularities))
+
+seoul.bike.x = as.matrix(seoul[model.bike.factors])
+seoul.bike.y = as.matrix(seoul["RentedBikeCount"])
+
+lasso_cv <- cv.glmnet(x = seoul.bike.x,
+                      y = seoul.bike.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
+lasso.bike.factors = model.bike.factors[which(d != 0)]
+seoul.bike.lasso = lm(RentedBikeCount ~ .,
+                                       seoul[c("RentedBikeCount",
+                                       lasso.bike.factors)])
+
+print(summary(seoul.bike.lasso))
+
+seoul.bike.base.model = lm(RentedBikeCount ~ 1, seoul[c("RentedBikeCount", model.bike.factors)])
+seoul.bike.full.model = lm(RentedBikeCount ~ ., seoul[c("RentedBikeCount", model.bike.factors)])
+
+seoul.bike.step = step(seoul.bike.base.model,
+                       direction = "both",
+                       k = log(nrow(seoul)),
+                       scope = list(lower=seoul.bike.base.model,
+                                    upper=seoul.bike.full.model))
+
+print(summary(seoul.bike.step))
+
+# seoul.base.models = create_season_models(model.factors,
+#                                          "TemperatureChange",
+#                                          base = T)
+#   
+# seoul.full.models = create_season_models(model.factors,
+#                                          "TemperatureChange")
+# 
+# 
+# #Stepwise BIC
+# create_season_stepwise = function(base_models, 
+#                                   full_models){
+#   models = list()
+#   for(m in 1:length(base_models)){
+#     base.model = base_models[[m]]
+#     full.model = full_models[[m]]
+#     season = unique(seoul$Seasons)[m]
+#     
+#     models[[str_c("seoul.stepwise.",season)]] <- step(base.model,
+#          direction="both",
+#          k = log(nrow(seoul[seoul$Seasons == season,])),
+#          scope=list(lower=base.model,
+#                      upper=full.model))
+#   }
+#   return(models)
+# }
+# 
+# seoul.stepwise.bic.models = create_season_stepwise(seoul.base.models,
+#                                                    seoul.full.models)
+
+# for(model in seoul.stepwise.bic.models){
+#   print(summary(model))
+# }
+  
+# summary(seoul.stepwise.bic)
+# length(seoul.stepwise.bic$coefficients)
+# 
+# seoul$step.residuals = seoul.stepwise.bic$residuals
+#
+# create_lasso = function(){
+#   models = list()
+#   seasons = seoul$Seasons %>% unique()
+#   for(s in seasons){
+#     #print(s)
+#     seoul.subset = seoul %>% filter(Seasons == s)
+#     seoul.x = as.matrix(seoul.subset[model.factors])
+#     seoul.y = as.matrix(seoul.subset["TemperatureChange"])
+#   
+#     lasso_cv <- cv.glmnet(x = seoul.x,
+#                           y = seoul.y, 
+#                           type.measure = "mse", 
+#                           alpha = 1)
+#   
+#     d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
+#     lasso.factors = model.factors[which(d != 0)]
+#     models[[str_c("seoul.lasso.",s)]] = lm(TemperatureChange ~ 0 + .,
+#                                            seoul.subset[c("TemperatureChange",
+#                                            lasso.factors)])
+#   }
+#   return(models)
+# }
+# seoul.lasso.models = create_lasso()
+# for(model in seoul.lasso.models){
+#   print(summary(model))
+# }
+
+
+```
+
+```{r}
+epsilon = 0.5
+t = seoul %>% filter(abs(RainfallChange) >= epsilon) %>% mutate(
+  RainfallChange = RainfallChange + abs(min(RainfallChange)) + 1,
+  TemperatureChange = TemperatureChange #+ abs(min(TemperatureChange)) + 1
+)
+
+t %>% ggplot()+
+  geom_point(aes(x=RainfallChange, y=TemperatureChange))
+
 # t$Rainfall = t$Rainfall^1.5
-invTranPlot(TempChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-bc = boxCox(t$TempChange+abs(min(t$TempChange))+1 ~ t$Rainfall)
+invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+bc = boxCox(t$TemperatureChange ~ t$Rainfall)
 lambda = bc$x[which(bc$y == max(bc$y))]
 lambda
-t$TempChange = t$TempChange+abs(min(t$TempChange))+1
-t$TempChange = t$TempChange^2
+t$TemperatureChange = t$TemperatureChange^2
+
+invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
 
 t %>% ggplot()+
-  geom_point(aes(x=Rainfall, y=TempChange))
-invTranPlot(TempChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+  geom_point(aes(x=RainfallChange, y=TemperatureChange))
 
-t = seoul %>% filter(Snowfall > 0)
-invTranPlot(TempChange ~ Snowfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-t %>% ggplot()+
-  geom_point(aes(x=sqrt(Snowfall), y=TempChange))
+invTranPlot(TemperatureChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
 
-snowfall.lm = lm(TempChange ~ Snowfall, data=t)
+t = seoul %>% mutate(
+    SnowfallChange = SnowfallChange + abs(min(SnowfallChange)) + 1,
+    TemperatureChange = TemperatureChange + abs(min(TemperatureChange)) + 1
+)
+invTranPlot(TemperatureChange ~ SnowfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+
+seoul %>% ggplot()+
+  geom_point(aes(x=SnowfallChange, y=TemperatureChange))
+
+snowfall.lm = lm(TemperatureChange ~ Snowfall, data=t)
 summary(snowfall.lm)
 
 seoul %>% mutate(
@@ -194,10 +452,8 @@ seoul %>% mutate(
   )
 )
 
-RainThreshold = 5
-
 seoul %>% mutate(
-  IsRaining = Rainfall >= RainThreshold,
+  IsRainDifference = abs(RainfallChange) >= epsilon,
   IsSnowing = ifelse(
     Snowfall == 0, 0,
     predict(snowfall.lm, seoul)
@@ -206,22 +462,20 @@ seoul %>% mutate(
 ```
 
 ```{r}
-for(effect in weather_effects){
-  for(hour in hours){
-    factor = str_c(effect, "X", hour)
-    seoul.factors = c(seoul.factors, factor)
-    seoul[factor] = seoul[effect]*seoul[hour]
-    seoul.interaction = c(seoul.interaction, factor)
-  }
-}
+# for(effect in weather_effects){
+#   for(hour in hours){
+#     factor = str_c(effect, "X", hour)
+#     seoul.factors = c(seoul.factors, factor)
+#     seoul[factor] = seoul[effect]*seoul[hour]
+#     seoul.interaction = c(seoul.interaction, factor)
+#   }
+# }
 ```
 
-Test assumptions
-
 ```{r}
-seoul.interaction.lm = lm(TempChange ~ ., seoul[setdiff(seoul.factors, seoul.base)])
-seoul$interaction.residuals = seoul.interaction.lm$residuals
-summary(seoul.interaction.lm)
+# seoul.interaction.lm = lm(TemperatureChange ~ ., seoul[setdiff(seoul.factors, seoul.base)])
+# seoul$interaction.residuals = seoul.interaction.lm$residuals
+# summary(seoul.interaction.lm)
 ```
 
 ```{r}
@@ -283,142 +537,172 @@ summary(seoul.interaction.lm)
 ```
 
 ```{r}
-seoul.x = as.matrix(seoul[setdiff(seoul.factors, c(seoul.base, "TempChange"))])
-seoul.y = as.matrix(seoul["TempChange"])
-
-lasso_cv <- cv.glmnet(x = seoul.x,
-                        y = seoul.y, 
-                        type.measure = "mse", 
-                        alpha = 1)
-
-model.factors = setdiff(seoul.factors, c(seoul.base, "TempChange"))
-
-d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
-lasso.factors = model.factors[which(d != 0)]
-length(lasso.factors)
-
-seoul.lasso = lm(TempChange ~ ., seoul[c("TempChange", lasso.factors)])
-summary(seoul.lasso)
-
-seoul.base.model = lm(TempChange ~ 1, seoul)
-
-seoul.stepwise.bic = step(seoul.base.model,
-                          direction="both",
-                          k = log(nrow(seoul)),
-                          scope=list(lower=seoul.base.model,
-                                     upper=seoul.interaction.lm))
-summary(seoul.stepwise.bic)
-
-seoul$step.residuals = seoul.stepwise.bic$residuals
+# resid_vs_hour09 <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = Hour09, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_hour1015 <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = Hour1015, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_humidity <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = Humidity, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_windspeed <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = WindSpeed, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_solarradiation <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarRadiation, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_rainfall <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = Rainfall, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_snowfall <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = Snowfall, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_issummer <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = IsSummer, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_iswinter <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = IsWinter, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_isspring <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = IsSpring, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# ### Interaction Effects
+# 
+# resid_vs_sxh10 <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarXHour1015, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_sxs <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarXIsSummer, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_sxh09 <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarXHour09, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_hxh09 <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = HumidityXHour09, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_sxw <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarXIsWinter, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# resid_vs_sxsp <- ggplot(data = seoul) +
+#   geom_point(mapping = aes(x = SolarXIsSpring, y = step.residuals)) +
+#   theme(aspect.ratio = 1)
+# 
+# 
+# resid_vs_hour09
+# resid_vs_hour1015
+# resid_vs_humidity
+# resid_vs_windspeed
+# resid_vs_solarradiation
+# resid_vs_rainfall
+# resid_vs_snowfall
+# resid_vs_issummer
+# resid_vs_iswinter
+# resid_vs_isspring
+# 
+# resid_vs_sxh09
+# resid_vs_sxh10
+# resid_vs_sxs
+# resid_vs_sxsp
+# resid_vs_sxw
+# resid_vs_hxh09
 ```
 
 ```{r}
-resid_vs_hour09 <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = Hour09, y = step.residuals)) +
-  theme(aspect.ratio = 1)
+# for(m in 1:length(seoul.lasso.models)){
+#   model = models[[m]] 
+#   plot = autoplot(model) +
+#     ggtitle(unique(seoul$Seasons)[m]) +
+#     theme(aspect.ratio = 1)
+#   print(plot)
+# }
 
-resid_vs_hour1015 <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = Hour1015, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_humidity <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = Humidity, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_windspeed <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = WindSpeed, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_solarradiation <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarRadiation, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_rainfall <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = Rainfall, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_snowfall <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = Snowfall, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_issummer <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = IsSummer, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_iswinter <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = IsWinter, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_isspring <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = IsSpring, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-### Interaction Effects
-
-resid_vs_sxh10 <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarXHour1015, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_sxs <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarXIsSummer, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_sxh09 <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarXHour09, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_hxh09 <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = HumidityXHour09, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_sxw <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarXIsWinter, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-resid_vs_sxsp <- ggplot(data = seoul) +
-  geom_point(mapping = aes(x = SolarXIsSpring, y = step.residuals)) +
-  theme(aspect.ratio = 1)
-
-
-resid_vs_hour09
-resid_vs_hour1015
-resid_vs_humidity
-resid_vs_windspeed
-resid_vs_solarradiation
-resid_vs_rainfall
-resid_vs_snowfall
-resid_vs_issummer
-resid_vs_iswinter
-resid_vs_isspring
-
-resid_vs_sxh09
-resid_vs_sxh10
-resid_vs_sxs
-resid_vs_sxsp
-resid_vs_sxw
-resid_vs_hxh09
+autoplot(seoul.lasso)
+autoplot(seoul.bike.lasso)
 ```
 
 ```{r}
-autotplots = autoplot(seoul.lasso)
-autoplots
+show_leverage(seoul.lasso)
+show_leverage(seoul.bike.lasso)
+```
+
+```{r}
+
 ```
 
 # 3 Conclusions
 
-$\Delta \text{Temperature}_t = \beta_0 + \beta_1I(0\leq\text{Hour}_t<10) + \beta_2I(10\leq\text{Hour}_t<16) + \beta_3\text{Humidity}_t + \beta_4\text{WindSpeed}_t + \beta_5\text{Visibility}_t + \beta_6\text{SolarRadiation}_t + \beta_7\text{Snowfall}_t +\beta_8I(\text{Season}_t = \text{Winter}) + \beta_9I(\text{Season}_t = \text{Summer}) + \beta_{10}\text{SolarRadiation}_tI(\text{Season}_t = \text{Spring}) + \beta_{11}\text{SolarRadiation}_tI(\text{Season}_t = \text{Winter}) + \beta_{12}\text{SolarRadiation}_tI(\text{Season}_t = \text{Summer}) + \beta_{13}\text{SolarRadiation}_tI(0\leq\text{Hour}_t<10) + \beta_{14}\text{WindSpeed}_tI(0\leq\text{Hour}_t<10) + \beta_{15}\text{WindSpeed}_tI(10\leq\text{Hour}_t<15) + \beta_{16}\text{Visibility}_tI(0\leq\text{Hour}_t<10) + \beta{17}\text{Rainfall}_tI(0\leq\text{Hour}_t<10) + \beta{18}\text{Rainfall}_tI(11\leq\text{Hour}_t<16) + \beta{19}\text{Snowfall}_tI(0\leq\text{Hour}_t<10) + \epsilon_i$
+<!-- $\Delta \text{Temperature}_t = \beta_0 + \beta_1I(0\leq\text{Hour}_t<10) + \beta_2I(10\leq\text{Hour}_t<16) + \beta_3\text{Humidity}_t + \beta_4\text{WindSpeed}_t + \beta_5\text{Visibility}_t + \beta_6\text{SolarRadiation}_t + \beta_7\text{Snowfall}_t +\beta_8I(\text{Season}_t = \text{Winter}) + \beta_9I(\text{Season}_t = \text{Summer}) + \beta_{10}\text{SolarRadiation}_tI(\text{Season}_t = \text{Spring}) + \beta_{11}\text{SolarRadiation}_tI(\text{Season}_t = \text{Winter}) + \beta_{12}\text{SolarRadiation}_tI(\text{Season}_t = \text{Summer}) + \beta_{13}\text{SolarRadiation}_tI(0\leq\text{Hour}_t<10) + \beta_{14}\text{WindSpeed}_tI(0\leq\text{Hour}_t<10) + \beta_{15}\text{WindSpeed}_tI(10\leq\text{Hour}_t<15) + \beta_{16}\text{Visibility}_tI(0\leq\text{Hour}_t<10) + \beta{17}\text{Rainfall}_tI(0\leq\text{Hour}_t<10) + \beta{18}\text{Rainfall}_tI(11\leq\text{Hour}_t<16) + \beta{19}\text{Snowfall}_tI(0\leq\text{Hour}_t<10) + \epsilon_i$ -->
 
 $\epsilon_i \overset{iid}{\sim} N(0, \sigma^2)$
 
 Give additional context to you results and interpretations from Section 5 with respect to the data set and its purpose. Describe any potential weaknesses in your analysis, and how they may affect the reliability of the results.
 
-```{r}
+```{r fig.width=12}
+seoul.temp$PredictedTemperatureChange = predict(seoul.lasso, seoul.temp)
+seoul.temp$PredictedTemperature = NA_real_
 
-seoul %>%
+for(s in seasons){
+  temp = Temp %>% filter(Seasons == s) %>% pull(Temperature) %>%
+    lag(n=1)
+  temp = temp[!is.na(temp)]
+  seoul.temp[seoul.temp$Seasons == s,]$PredictedTemperature =
+    seoul.temp[seoul.temp$Seasons == s,]$PredictedTemperatureChange +
+    temp
+}
+
+seoul.temp %>%
   ggplot()+
-  geom_line(aes(x=Date, y=TempChange, color="Actual"))+
-  geom_line(aes(x=Date, y=predict(seoul.lasso, seoul), color="Predicted"))
+  geom_line(aes(x=Time, y=TemperatureChange, color="Actual"), alpha=1)+
+  geom_line(aes(x=Time, y=PredictedTemperatureChange,
+                color="Predicted"), alpha=0.6)+
+  labs(title="Predicted Temperature Change in Seoul Over Time",
+       color=NULL)+
+  xlab("Time")+
+  ylab(expression(Delta~Temperature))
 
+seoul.temp %>%
+  ggplot()+
+  geom_line(aes(x=Time, y=Temperature, color="Actual"), alpha=1)+
+  geom_line(aes(x=Time, y=PredictedTemperature,
+                color="Predicted"), alpha=0.6)+
+  labs(title="Predicted Temperature in Seoul Over Time",
+       color=NULL)+
+  xlab("Time")+
+  ylab(expression(Temperature))
+
+```
+
+```{r message=F, warning=F}
+seoul$PredictedRentedBikeCount = predict(seoul.bike.step, seoul)
+seoul$residual = seoul$PredictedRentedBikeCount - seoul$RentedBikeCount
+
+seoul %>% 
+  ggplot()+
+  geom_point(aes(x=Time, y=exp(RentedBikeCount)-1, color="Actual"), alpha=1)+
+  geom_point(aes(x=Time, y=exp(PredictedRentedBikeCount)-1,
+                color="Predicted"), alpha=0.3)+
+  facet_grid(~factor(seoul$Seasons, levels=c("Winter", "Spring", "Summer", "Autumn")), scales="free_x")+
+  labs(title="Predicted Bike Demand in Seoul Over Time",
+       color=NULL)+
+  xlab("Time")+
+  ylab("Rented Bike Count")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
 ```
 
 # 4 Contributions
