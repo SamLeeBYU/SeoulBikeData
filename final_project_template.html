@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Sam Lee">
+
+<title>Final Project Template</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="final_project_template_files/libs/clipboard/clipboard.min.js"></script>
+<script src="final_project_template_files/libs/quarto-html/quarto.js"></script>
+<script src="final_project_template_files/libs/quarto-html/popper.min.js"></script>
+<script src="final_project_template_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="final_project_template_files/libs/quarto-html/anchor.min.js"></script>
+<link href="final_project_template_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="final_project_template_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="final_project_template_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="final_project_template_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="final_project_template_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Final Project Template</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Sam Lee </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<style type="text/css">
+h1.title {
+font-size: 40px;
+text-align: center;
+}
+h4.author {
+font-size: 40px;
+text-align: center;
+}
+</style>
+<div style="page-break-after: always;"></div>
+<section id="abstract" class="level1">
+<h1>Abstract</h1>
+<p>Here, you will briefly summarize the entire report, including the data used, questions of interest, and relevant findings.</p>
+</section>
+<section id="problem-and-motivation" class="level1">
+<h1>1 Problem and Motivation</h1>
+<p>In this section, you will describe the background information about the study that is necessary to understand why the data are important. In other words, why was it important to gather the data in the first place?</p>
+<section id="data-description" class="level2">
+<h2 class="anchored" data-anchor-id="data-description">1.1 Data Description</h2>
+<p><a href="https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand">Seoul Bike Sharing Data</a></p>
+<p>Briefly state the source of your data and describe the relevant variables that <strong>you will use</strong> in your project. Include important details such as units for the different variables, and what the ``observational units” (rows in the data set) represent (e.g., individuals, countries, etc.)</p>
+</section>
+<section id="questions-of-interest" class="level2">
+<h2 class="anchored" data-anchor-id="questions-of-interest">1.2 Questions of Interest</h2>
+<p>Briefly and clearly state the two main questions that you will investigate throughout the report. These questions should be stated in scientific, and not statistical language. For example, “Is the slope of log of per capita GDP significantly different from zero?” should instead by give as “Does the log of per capita GDP have an effect on the average life expectancy of females in a given country?”</p>
+</section>
+<section id="regression-methods" class="level2">
+<h2 class="anchored" data-anchor-id="regression-methods">1.3 Regression Methods</h2>
+<p>For each question of interest listed in Section 2, describe what regression models, techniques, and tools you will use to fully answer it. These should include any plots you will use for exploratory analysis or diagnostic checks, as well as methods of inference you will use.</p>
+<p>In order to estimate the short-run fluctuations in temperature we used a first-differences regression model. We hypothesized that since there are seasonal effects that are unobservable in our data set the error term, <span class="math inline">\(\epsilon\)</span> is composed of a season-specific error term, <span class="math inline">\(\alpha_{s}\)</span> and other random effects that also vary by the time period (<span class="math inline">\(t\)</span>). Hence, <span class="math inline">\(\epsilon_{st} = \alpha_{s} + \eta_{st}\)</span>. Let <span class="math inline">\(s\)</span> denote the season and <span class="math inline">\(t\)</span> denote time. For our data set-specific purposes, we will seek to understand how <span class="math inline">\(\text{Temperature}_{st}\)</span> changes with respect to each season and hour (<span class="math inline">\(t\)</span>).</p>
+<p>Hence, for our simple multivariate regression model, if</p>
+<p><span class="math inline">\(\text{Temperature}_{st} = \beta_0 + \beta_1\text{Humidity}_{st} + \beta_2\text{DewPointTemp}_{st} + \beta_3\text{WindSpeed}_{st} + \beta_4\text{SolarRadiation}_{st} + \beta_5\text{Rainfall}_{st} + \beta_6\text{Snowfall}_{st} + \beta_7I(0 \leq \text{Hour}_t &lt; 10) + \beta_8I(10 \leq \text{Hour}_t &lt; 16) + \alpha_{s} + \eta_{st}\)</span></p>
+<p>Then,</p>
+<p><span class="math inline">\(\text{Temperature}_{st-1} = \beta_0 + \beta_1\text{Humidity}_{st-1} + \beta_2\text{DewPointTemp}_{st-1} + \beta_3\text{WindSpeed}_{st-1} + \beta_4\text{SolarRadiation}_{st-1} + \beta_5\text{Rainfall}_{st-1} + \beta_6\text{Snowfall}_{st-1} + \beta_7I(0 \leq \text{Hour}_{t-1} &lt; 10) + \beta_8I(10 \leq \text{Hour}_{t-1} &lt; 16) + \alpha_{s} + \eta_{st-1}\)</span></p>
+<p>Thus, we wish to estimate,</p>
+<p><span class="math inline">\(\Delta\text{Temperature}_{st} = \beta_1\Delta\text{Humidity}_{st} + \beta_2\Delta\text{DewPointTemp}_{st} + \beta_3\Delta\text{WindSpeed}_{st} + \beta_4\Delta\text{SolarRadiation}_{st} + \beta_5\Delta\text{Rainfall}_{st} + \beta_6\Delta\text{Snowfall}_{st} + \beta_7\Delta I(0 \leq \text{Hour}_t &lt; 10) + \beta_8 \Delta I(10 \leq \text{Hour}_t &lt; 16) + \Delta\eta_{st}\)</span></p>
+<p>This eliminates the <span class="math inline">\(t-1\)</span> temperature dependency (and all other lagged dependencies for <span class="math inline">\(t-1\)</span> in <span class="math inline">\(X\)</span>) and isolates the short-run change in temperature, which is what we seek to estimate.</p>
+<p>In order to estimate the hourly demand for bike sharing in Seoul. Similar to our model for temperature, we have unobserved seasonal effects in <span class="math inline">\(\epsilon\)</span>. However, exploratory data analysis has shown that current bike demand is not strongly dependent on the bike demand from <span class="math inline">\(t-1\)</span>. Instead of using a first-difference approach, we will use a fixed effects models to include the seasonal effects for <span class="math inline">\(s-1\)</span> (3) seasons to obtain unbiased estimates.</p>
+<p>Hence, our basic fixed effects multivariate model for measuring the demand for rented bikes in Seoul will be interpreted as,</p>
+<p><span class="math inline">\(ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t &lt; 20) + ... + \beta9I(90 \leq Humidity_t &lt; 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}\sqrt{\text{Visibility}_{st}} + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_st\)</span></p>
+</section>
+</section>
+<section id="analyses-results-and-interpretation" class="level1">
+<h1>2 Analyses, Results, and Interpretation</h1>
+<p>Conduct the analysis in a logical fashion, including necessary code (and not any superfluous code) and its output. Give simple interpretations of your findings related to the questions of interest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>seasons <span class="ot">=</span> <span class="fu">unique</span>(seoul<span class="sc">$</span>Seasons)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>Temp <span class="ot">=</span> seoul[<span class="fu">c</span>(<span class="st">"Time"</span>, <span class="st">"Temperature"</span>, <span class="st">"Seasons"</span>)]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>season.base <span class="ot">=</span> <span class="st">"IsSpring"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>season.dummies <span class="ot">=</span> <span class="fu">setdiff</span>(<span class="fu">c</span>(<span class="st">"IsWinter"</span>, <span class="st">"IsSpring"</span>, <span class="st">"IsSummer"</span>, <span class="st">"IsAutumn"</span>), season.base)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>time.base <span class="ot">=</span> <span class="st">"Hour1624"</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>time.dummies <span class="ot">=</span> <span class="fu">setdiff</span>(<span class="fu">c</span>(<span class="st">"Hour09"</span>, <span class="st">"Hour1015"</span>), time.base)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>seoul.factors <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"Temperature"</span>, <span class="st">"Humidity"</span>, <span class="st">"DewPointTemp"</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"WindSpeed"</span>, <span class="st">"Visibility"</span>, <span class="st">"SolarRadiation"</span>, <span class="st">"Rainfall"</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"Snowfall"</span>, time.dummies)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>seoul.change <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> seoul.factors){</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  change_factor <span class="ot">=</span> <span class="fu">str_c</span>(factor, <span class="st">"Change"</span>)</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>  seoul.change <span class="ot">=</span> <span class="fu">c</span>(seoul.change, change_factor)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>  seoul[change_factor] <span class="ot">=</span> <span class="cn">NA_real_</span></span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(s <span class="cf">in</span> seasons){</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>    seoul.subset <span class="ot">=</span> seoul <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Seasons <span class="sc">==</span> s)</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    seoul[seoul<span class="sc">$</span>Seasons <span class="sc">==</span> s, change_factor] <span class="ot">=</span> seoul.subset[factor]<span class="sc">-</span><span class="fu">lag</span>(seoul.subset[factor], <span class="at">n=</span><span class="dv">1</span>)</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>seoul.interaction <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>seoul.base <span class="ot">=</span> <span class="fu">c</span>(time.base)</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a><span class="co">#All 2d Interaction Effects</span></span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>continuous_interactions <span class="ot">=</span> <span class="fu">combn</span>(<span class="fu">setdiff</span>(seoul.change, </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">c</span>(<span class="fu">str_c</span>(time.dummies, <span class="st">"Change"</span>),</span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                                          <span class="fu">str_c</span>(season.dummies, <span class="st">"Change"</span>),</span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">"TemperatureChange"</span>)), <span class="dv">2</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(continuous_interactions)){</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  factor <span class="ot">=</span> <span class="fu">paste</span>(continuous_interactions[,i], <span class="at">collapse =</span> <span class="st">"X"</span>)</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  seoul.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.interaction, factor)</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  seoul[factor] <span class="ot">=</span> <span class="cn">NA_real_</span></span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(s <span class="cf">in</span> seasons){</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>    seoul.subset <span class="ot">=</span> seoul <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Seasons <span class="sc">==</span> s)</span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>    seoul[seoul<span class="sc">$</span>Seasons <span class="sc">==</span> s, factor] <span class="ot">=</span> seoul.subset[continuous_interactions[<span class="dv">1</span>,i]]<span class="sc">*</span></span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                                        seoul.subset[continuous_interactions[<span class="dv">2</span>,i]]</span>
+<span id="cb1-42"><a href="#cb1-42" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-43"><a href="#cb1-43" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-44"><a href="#cb1-44" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-45"><a href="#cb1-45" aria-hidden="true" tabindex="-1"></a><span class="co">#Time Interaction Effects</span></span>
+<span id="cb1-46"><a href="#cb1-46" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> <span class="fu">setdiff</span>(seoul.change, </span>
+<span id="cb1-47"><a href="#cb1-47" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="fu">str_c</span>(time.dummies, <span class="st">"Change"</span>),</span>
+<span id="cb1-48"><a href="#cb1-48" aria-hidden="true" tabindex="-1"></a>                        <span class="st">"TemperatureChange"</span>))){</span>
+<span id="cb1-49"><a href="#cb1-49" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(time <span class="cf">in</span> <span class="fu">str_c</span>(time.dummies, <span class="st">"Change"</span>)){</span>
+<span id="cb1-50"><a href="#cb1-50" aria-hidden="true" tabindex="-1"></a>    factor.interaction <span class="ot">=</span> <span class="fu">str_c</span>(factor, <span class="st">"X"</span>, time)</span>
+<span id="cb1-51"><a href="#cb1-51" aria-hidden="true" tabindex="-1"></a>    seoul.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.interaction, factor.interaction)</span>
+<span id="cb1-52"><a href="#cb1-52" aria-hidden="true" tabindex="-1"></a>    seoul[factor.interaction] <span class="ot">=</span> <span class="cn">NA_real_</span></span>
+<span id="cb1-53"><a href="#cb1-53" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span>(s <span class="cf">in</span> seasons){</span>
+<span id="cb1-54"><a href="#cb1-54" aria-hidden="true" tabindex="-1"></a>      seoul.subset <span class="ot">=</span> seoul <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Seasons <span class="sc">==</span> s)</span>
+<span id="cb1-55"><a href="#cb1-55" aria-hidden="true" tabindex="-1"></a>      seoul[seoul<span class="sc">$</span>Seasons <span class="sc">==</span> s, factor.interaction] <span class="ot">=</span> seoul.subset[factor]<span class="sc">*</span></span>
+<span id="cb1-56"><a href="#cb1-56" aria-hidden="true" tabindex="-1"></a>                                                      seoul.subset[time]</span>
+<span id="cb1-57"><a href="#cb1-57" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-58"><a href="#cb1-58" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-59"><a href="#cb1-59" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-60"><a href="#cb1-60" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-61"><a href="#cb1-61" aria-hidden="true" tabindex="-1"></a><span class="do">###### Rented Bike Count Model</span></span>
+<span id="cb1-62"><a href="#cb1-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-63"><a href="#cb1-63" aria-hidden="true" tabindex="-1"></a>time.bike <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb1-64"><a href="#cb1-64" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(h <span class="cf">in</span> <span class="fu">unique</span>(seoul<span class="sc">$</span>Hour)){</span>
+<span id="cb1-65"><a href="#cb1-65" aria-hidden="true" tabindex="-1"></a>  factor <span class="ot">=</span> <span class="fu">str_c</span>(<span class="st">"Hour"</span>, h)</span>
+<span id="cb1-66"><a href="#cb1-66" aria-hidden="true" tabindex="-1"></a>  seoul[factor] <span class="ot">=</span> <span class="fu">as.numeric</span>(seoul<span class="sc">$</span>Hour <span class="sc">==</span> h)</span>
+<span id="cb1-67"><a href="#cb1-67" aria-hidden="true" tabindex="-1"></a>  time.bike <span class="ot">=</span> <span class="fu">c</span>(time.bike, factor)</span>
+<span id="cb1-68"><a href="#cb1-68" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-69"><a href="#cb1-69" aria-hidden="true" tabindex="-1"></a>time.bike.base <span class="ot">=</span> <span class="st">"Hour0"</span></span>
+<span id="cb1-70"><a href="#cb1-70" aria-hidden="true" tabindex="-1"></a>time.bike <span class="ot">=</span> <span class="fu">setdiff</span>(time.bike, time.bike.base)</span>
+<span id="cb1-71"><a href="#cb1-71" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-72"><a href="#cb1-72" aria-hidden="true" tabindex="-1"></a>a <span class="ot">=</span> <span class="dv">1</span> <span class="co">#1 is excluded for base dummy</span></span>
+<span id="cb1-73"><a href="#cb1-73" aria-hidden="true" tabindex="-1"></a>time.humidities <span class="ot">=</span> <span class="fu">str_c</span>(<span class="st">"Humidity"</span>,<span class="fu">setdiff</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>, a))</span>
+<span id="cb1-74"><a href="#cb1-74" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(h <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(time.humidities)){</span>
+<span id="cb1-75"><a href="#cb1-75" aria-hidden="true" tabindex="-1"></a>  h.min <span class="ot">=</span> (h<span class="dv">-1</span><span class="sc">+</span>a)<span class="sc">*</span><span class="dv">10</span></span>
+<span id="cb1-76"><a href="#cb1-76" aria-hidden="true" tabindex="-1"></a>  h.max <span class="ot">=</span> (h<span class="sc">+</span>a)<span class="sc">*</span><span class="dv">10</span></span>
+<span id="cb1-77"><a href="#cb1-77" aria-hidden="true" tabindex="-1"></a>  seoul[time.humidities[h]] <span class="ot">=</span> <span class="dv">1</span><span class="sc">*</span>(seoul<span class="sc">$</span>Humidity <span class="sc">&gt;=</span> h.min <span class="sc">&amp;</span></span>
+<span id="cb1-78"><a href="#cb1-78" aria-hidden="true" tabindex="-1"></a>                                 seoul<span class="sc">$</span>Humidity <span class="sc">&lt;</span> h.max)</span>
+<span id="cb1-79"><a href="#cb1-79" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-80"><a href="#cb1-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-81"><a href="#cb1-81" aria-hidden="true" tabindex="-1"></a>bike.dummies <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"IsHoliday"</span>)</span>
+<span id="cb1-82"><a href="#cb1-82" aria-hidden="true" tabindex="-1"></a>seoul.bike.factors <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"RentedBikeCount"</span>, time.humidities, <span class="st">"Temperature"</span>,</span>
+<span id="cb1-83"><a href="#cb1-83" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"WindSpeed"</span>, <span class="st">"Visibility"</span>, <span class="st">"DewPointTemp"</span>,</span>
+<span id="cb1-84"><a href="#cb1-84" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"SolarRadiation"</span>, <span class="st">"ExtremeWind"</span>,</span>
+<span id="cb1-85"><a href="#cb1-85" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Rainfall"</span>, <span class="st">"Snowfall"</span>, bike.dummies, time.bike,</span>
+<span id="cb1-86"><a href="#cb1-86" aria-hidden="true" tabindex="-1"></a>                       season.dummies)</span>
+<span id="cb1-87"><a href="#cb1-87" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-88"><a href="#cb1-88" aria-hidden="true" tabindex="-1"></a>seoul<span class="sc">$</span>ExtremeWind <span class="ot">=</span> <span class="dv">1</span><span class="sc">*</span>(seoul<span class="sc">$</span>WindSpeed <span class="sc">&gt;</span> <span class="fu">quantile</span>(seoul<span class="sc">$</span>WindSpeed, <span class="fl">0.95</span>))</span>
+<span id="cb1-89"><a href="#cb1-89" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-90"><a href="#cb1-90" aria-hidden="true" tabindex="-1"></a><span class="co">#Transform Visibility</span></span>
+<span id="cb1-91"><a href="#cb1-91" aria-hidden="true" tabindex="-1"></a>seoul<span class="sc">$</span>Visibility <span class="ot">=</span> <span class="sc">-</span><span class="fu">sqrt</span>(seoul<span class="sc">$</span>Visibility)</span>
+<span id="cb1-92"><a href="#cb1-92" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-93"><a href="#cb1-93" aria-hidden="true" tabindex="-1"></a>seoul.bike.interaction <span class="ot">=</span> <span class="fu">c</span>()</span>
+<span id="cb1-94"><a href="#cb1-94" aria-hidden="true" tabindex="-1"></a>seoul.bike.base <span class="ot">=</span> <span class="fu">c</span>(time.bike.base)</span>
+<span id="cb1-95"><a href="#cb1-95" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-96"><a href="#cb1-96" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-97"><a href="#cb1-97" aria-hidden="true" tabindex="-1"></a>continuous_interactions_bike <span class="ot">=</span> <span class="fu">combn</span>(<span class="fu">setdiff</span>(seoul.bike.factors, </span>
+<span id="cb1-98"><a href="#cb1-98" aria-hidden="true" tabindex="-1"></a>                                        <span class="fu">c</span>(time.bike, season.dummies,</span>
+<span id="cb1-99"><a href="#cb1-99" aria-hidden="true" tabindex="-1"></a>                                          time.humidities,</span>
+<span id="cb1-100"><a href="#cb1-100" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">"RentedBikeCount"</span>)), <span class="dv">2</span>)</span>
+<span id="cb1-101"><a href="#cb1-101" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">ncol</span>(continuous_interactions_bike)){</span>
+<span id="cb1-102"><a href="#cb1-102" aria-hidden="true" tabindex="-1"></a>  factor <span class="ot">=</span> <span class="fu">paste</span>(continuous_interactions_bike[,i], <span class="at">collapse =</span> <span class="st">"X"</span>)</span>
+<span id="cb1-103"><a href="#cb1-103" aria-hidden="true" tabindex="-1"></a>  seoul.bike.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.bike.interaction, factor)</span>
+<span id="cb1-104"><a href="#cb1-104" aria-hidden="true" tabindex="-1"></a>  seoul[factor] <span class="ot">=</span> seoul[continuous_interactions_bike[<span class="dv">1</span>,i]]<span class="sc">*</span></span>
+<span id="cb1-105"><a href="#cb1-105" aria-hidden="true" tabindex="-1"></a>                  seoul[continuous_interactions_bike[<span class="dv">2</span>,i]]</span>
+<span id="cb1-106"><a href="#cb1-106" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-107"><a href="#cb1-107" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-108"><a href="#cb1-108" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> <span class="fu">setdiff</span>(seoul.bike.factors,</span>
+<span id="cb1-109"><a href="#cb1-109" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">c</span>(time.bike, season.dummies, <span class="st">"RentedBikeCount"</span>))){</span>
+<span id="cb1-110"><a href="#cb1-110" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(time <span class="cf">in</span> time.bike){</span>
+<span id="cb1-111"><a href="#cb1-111" aria-hidden="true" tabindex="-1"></a>    factor.interaction <span class="ot">=</span> <span class="fu">str_c</span>(factor, <span class="st">"X"</span>, time)</span>
+<span id="cb1-112"><a href="#cb1-112" aria-hidden="true" tabindex="-1"></a>    seoul.bike.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.bike.interaction, factor.interaction)</span>
+<span id="cb1-113"><a href="#cb1-113" aria-hidden="true" tabindex="-1"></a>    seoul[factor.interaction] <span class="ot">=</span> seoul[factor]<span class="sc">*</span>seoul[time]</span>
+<span id="cb1-114"><a href="#cb1-114" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-115"><a href="#cb1-115" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-116"><a href="#cb1-116" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-117"><a href="#cb1-117" aria-hidden="true" tabindex="-1"></a><span class="co">#Seasonal Interactions</span></span>
+<span id="cb1-118"><a href="#cb1-118" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> <span class="fu">setdiff</span>(seoul.bike.factors,</span>
+<span id="cb1-119"><a href="#cb1-119" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">c</span>(season.dummies, <span class="st">"RentedBikeCount"</span>))){</span>
+<span id="cb1-120"><a href="#cb1-120" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(s <span class="cf">in</span> season.dummies){</span>
+<span id="cb1-121"><a href="#cb1-121" aria-hidden="true" tabindex="-1"></a>    factor.interaction <span class="ot">=</span> <span class="fu">str_c</span>(factor, <span class="st">"X"</span>, s)</span>
+<span id="cb1-122"><a href="#cb1-122" aria-hidden="true" tabindex="-1"></a>    seoul.bike.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.bike.interaction, factor.interaction)</span>
+<span id="cb1-123"><a href="#cb1-123" aria-hidden="true" tabindex="-1"></a>    seoul[factor.interaction] <span class="ot">=</span> seoul[factor]<span class="sc">*</span>seoul[s]</span>
+<span id="cb1-124"><a href="#cb1-124" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-125"><a href="#cb1-125" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-126"><a href="#cb1-126" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-127"><a href="#cb1-127" aria-hidden="true" tabindex="-1"></a><span class="co">#Humidity and Other Weather Effects</span></span>
+<span id="cb1-128"><a href="#cb1-128" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> <span class="fu">setdiff</span>(seoul.bike.factors,</span>
+<span id="cb1-129"><a href="#cb1-129" aria-hidden="true" tabindex="-1"></a>                        <span class="fu">c</span>(time.bike, season.dummies,</span>
+<span id="cb1-130"><a href="#cb1-130" aria-hidden="true" tabindex="-1"></a>                                          time.humidities,</span>
+<span id="cb1-131"><a href="#cb1-131" aria-hidden="true" tabindex="-1"></a>                                          <span class="st">"RentedBikeCount"</span>))){</span>
+<span id="cb1-132"><a href="#cb1-132" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span>(humidity <span class="cf">in</span> time.humidities){</span>
+<span id="cb1-133"><a href="#cb1-133" aria-hidden="true" tabindex="-1"></a>    factor.interaction <span class="ot">=</span> <span class="fu">str_c</span>(factor, <span class="st">"X"</span>, humidity)</span>
+<span id="cb1-134"><a href="#cb1-134" aria-hidden="true" tabindex="-1"></a>    seoul.bike.interaction <span class="ot">=</span> <span class="fu">c</span>(seoul.bike.interaction, factor.interaction)</span>
+<span id="cb1-135"><a href="#cb1-135" aria-hidden="true" tabindex="-1"></a>    seoul[factor.interaction] <span class="ot">=</span> seoul[factor]<span class="sc">*</span>seoul[humidity]</span>
+<span id="cb1-136"><a href="#cb1-136" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-137"><a href="#cb1-137" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-138"><a href="#cb1-138" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-139"><a href="#cb1-139" aria-hidden="true" tabindex="-1"></a>seoul[<span class="fu">complete.cases</span>(seoul[seoul.change]), ] <span class="ot">-&gt;</span> seoul.temp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(<span class="fu">cor</span>(seoul[seoul.bike.factors]), <span class="at">type =</span> <span class="st">"upper"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">corrplot</span>(<span class="fu">cor</span>(seoul.temp[seoul.change]), <span class="at">type=</span><span class="st">"upper"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>seoul.temp <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>Hour, <span class="at">y=</span>TemperatureChange))<span class="sc">+</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-3.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(<span class="at">IsPrecip=</span>(Rainfall<span class="sc">+</span>Snowfall) <span class="sc">&gt;</span> threshold) <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>Hour, <span class="at">y=</span>RentedBikeCount, <span class="at">color=</span>IsPrecip))<span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-4.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>Hour, <span class="at">y=</span>RentedBikeCount, <span class="at">color=</span>FunctioningDay))<span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-5.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(FunctioningDay <span class="sc">==</span> <span class="st">"Yes"</span>) <span class="ot">-&gt;</span> seoul</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>seoul.temp <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>((<span class="fu">aes</span>(<span class="at">y=</span>TemperatureChange, <span class="at">x=</span>Seasons)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-6.png" class="img-fluid" width="768"></p>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>seoul.temp <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x=</span>DewPointTempChange, <span class="at">y=</span>TemperatureChange))<span class="sc">+</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(Hour09<span class="sc">+</span>Hour1015<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-2-7.png" class="img-fluid" width="768"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># create_season_models = function(factors, response, base=F){</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   factors = setdiff(factors, response)</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   if(base == T){</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     f = 0</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   } else {</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co">#     f = paste(c(0, factors), collapse = " + ")</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   models &lt;- map(unique(seoul$Seasons), function(x){</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="co">#     lm(formula(paste(response, "~", f)), </span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a><span class="co">#        data = seoul[seoul$Seasons == x,] %&gt;% </span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co">#          select(all_of(c(factors, response))))</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   })</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   names(models) &lt;- str_c("seoul.lm.", unique(seoul$Seasons))</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a><span class="co">#   return(models)</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a><span class="co"># models.lm = create_season_models(seoul.change, "TemperatureChange")</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="co"># for(model in models.lm){</span></span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   print(summary(model))</span></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>seoul.lm <span class="ot">=</span> <span class="fu">lm</span>(TemperatureChange <span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> ., <span class="at">data=</span>seoul.temp[seoul.change])</span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(seoul.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = TemperatureChange ~ 0 + ., data = seoul.temp[seoul.change])
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.2634 -0.2841 -0.0656  0.2377  8.1452 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(&gt;|t|)    
+HumidityChange       -1.121e-01  1.691e-03 -66.279  &lt; 2e-16 ***
+DewPointTempChange    3.481e-01  7.263e-03  47.929  &lt; 2e-16 ***
+WindSpeedChange       5.757e-02  8.735e-03   6.591 4.61e-11 ***
+VisibilityChange     -2.807e-05  2.837e-05  -0.990    0.322    
+SolarRadiationChange  1.223e+00  2.249e-02  54.370  &lt; 2e-16 ***
+RainfallChange        4.470e-03  4.706e-03   0.950    0.342    
+SnowfallChange       -3.958e-02  6.485e-02  -0.610    0.542    
+Hour09Change         -3.960e-01  2.405e-02 -16.465  &lt; 2e-16 ***
+Hour1015Change       -1.733e-01  2.484e-02  -6.975 3.29e-12 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5514 on 8747 degrees of freedom
+Multiple R-squared:  0.6575,    Adjusted R-squared:  0.6571 
+F-statistic:  1865 on 9 and 8747 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>seoul.bike.lm <span class="ot">=</span> <span class="fu">lm</span>(RentedBikeCount <span class="sc">~</span> ., <span class="at">data=</span>seoul[seoul.bike.factors])</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(seoul.bike.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = RentedBikeCount ~ ., data = seoul[seoul.bike.factors])
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.9065 -0.2260  0.0659  0.3132  5.4438 
+
+Coefficients:
+                 Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     5.9022376  0.1576636  37.436  &lt; 2e-16 ***
+Humidity2      -0.1363428  0.1800824  -0.757 0.449003    
+Humidity3      -0.0497627  0.1546260  -0.322 0.747593    
+Humidity4      -0.0913967  0.1453521  -0.629 0.529500    
+Humidity5      -0.0759719  0.1412175  -0.538 0.590606    
+Humidity6      -0.0463006  0.1401239  -0.330 0.741086    
+Humidity7      -0.0161701  0.1411461  -0.115 0.908794    
+Humidity8      -0.0190094  0.1438561  -0.132 0.894875    
+Humidity9      -0.3398911  0.1471604  -2.310 0.020931 *  
+Humidity10     -1.4305374  0.1524845  -9.382  &lt; 2e-16 ***
+Temperature     0.0560344  0.0061662   9.087  &lt; 2e-16 ***
+WindSpeed      -0.0427215  0.0083446  -5.120 3.13e-07 ***
+Visibility      0.0018401  0.0008752   2.102 0.035543 *  
+DewPointTemp   -0.0221133  0.0065618  -3.370 0.000755 ***
+SolarRadiation  0.0597410  0.0155678   3.837 0.000125 ***
+ExtremeWind     0.0577604  0.0361412   1.598 0.110039    
+Rainfall       -0.1551105  0.0061038 -25.412  &lt; 2e-16 ***
+Snowfall       -0.0126003  0.0147890  -0.852 0.394236    
+IsHoliday      -0.3303221  0.0292847 -11.280  &lt; 2e-16 ***
+Hour1          -0.2008492  0.0428598  -4.686 2.83e-06 ***
+Hour2          -0.5147022  0.0429126 -11.994  &lt; 2e-16 ***
+Hour3          -0.8545948  0.0429662 -19.890  &lt; 2e-16 ***
+Hour4          -1.2263600  0.0429896 -28.527  &lt; 2e-16 ***
+Hour5          -1.1891656  0.0430931 -27.595  &lt; 2e-16 ***
+Hour6          -0.5402485  0.0431165 -12.530  &lt; 2e-16 ***
+Hour7           0.1126709  0.0430985   2.614 0.008958 ** 
+Hour8           0.5656903  0.0433375  13.053  &lt; 2e-16 ***
+Hour9           0.1295087  0.0443133   2.923 0.003481 ** 
+Hour10         -0.2245017  0.0460589  -4.874 1.11e-06 ***
+Hour11         -0.1631385  0.0479699  -3.401 0.000675 ***
+Hour12         -0.0790450  0.0493833  -1.601 0.109493    
+Hour13         -0.0684973  0.0499210  -1.372 0.170065    
+Hour14         -0.0849609  0.0492616  -1.725 0.084620 .  
+Hour15         -0.0018279  0.0480401  -0.038 0.969649    
+Hour16          0.1052389  0.0463679   2.270 0.023254 *  
+Hour17          0.3691148  0.0449210   8.217 2.40e-16 ***
+Hour18          0.7228698  0.0439750  16.438  &lt; 2e-16 ***
+Hour19          0.5094246  0.0435007  11.711  &lt; 2e-16 ***
+Hour20          0.4313026  0.0432244   9.978  &lt; 2e-16 ***
+Hour21          0.4491410  0.0429989  10.445  &lt; 2e-16 ***
+Hour22          0.3536131  0.0428603   8.250  &lt; 2e-16 ***
+Hour23          0.1129445  0.0428212   2.638 0.008365 ** 
+IsWinter       -0.5286311  0.0252528 -20.934  &lt; 2e-16 ***
+IsSummer        0.0534754  0.0242817   2.202 0.027672 *  
+IsAutumn        0.2798132  0.0188112  14.875  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.5681 on 8420 degrees of freedom
+Multiple R-squared:  0.7588,    Adjusted R-squared:  0.7575 
+F-statistic: 601.9 on 44 and 8420 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">avPlots</span>(seoul.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">avPlots</span>(seoul.bike.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-4-6.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell" data-figsize="12">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(seoul.lm) <span class="sc">+</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(seoul.bike.lm) <span class="sc">+</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>show_leverage <span class="ot">=</span> <span class="cf">function</span>(model){</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  cd_cont_pos <span class="ot">&lt;-</span> <span class="cf">function</span>(leverage, level, model) {</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">sqrt</span>(level <span class="sc">*</span> <span class="fu">length</span>(<span class="fu">coef</span>(model)) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> leverage) <span class="sc">/</span> leverage)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  cd_cont_neg <span class="ot">&lt;-</span> <span class="cf">function</span>(leverage, level, model) {</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">-</span><span class="fu">cd_cont_pos</span>(leverage, level, model)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  cd_threshold <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  cd_threshold2 <span class="ot">&lt;-</span> <span class="dv">4</span> <span class="sc">/</span> (<span class="fu">nrow</span>(seoul) <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  x_max_val <span class="ot">&lt;-</span> <span class="fl">0.35</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">autoplot</span>(model, <span class="at">which =</span> <span class="dv">5</span>, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">ncol =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">aspect.ratio =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_function</span>(<span class="at">fun =</span> cd_cont_pos,</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>                  <span class="at">args =</span> <span class="fu">list</span>(<span class="at">level =</span> cd_threshold, <span class="at">model =</span> model),</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, x_max_val), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">colour =</span> <span class="st">"#FFACEE"</span>) <span class="sc">+</span></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_function</span>(<span class="at">fun =</span> cd_cont_neg,</span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>                  <span class="at">args =</span> <span class="fu">list</span>(<span class="at">level =</span> cd_threshold, <span class="at">model =</span> model),</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, x_max_val), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">colour =</span> <span class="st">"#FFACEE"</span>) <span class="sc">+</span></span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_function</span>(<span class="at">fun =</span> cd_cont_pos,</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>                  <span class="at">args =</span> <span class="fu">list</span>(<span class="at">level =</span> cd_threshold2, <span class="at">model =</span> model),</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, x_max_val), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">colour =</span> <span class="st">"#AFDFFF"</span>) <span class="sc">+</span></span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_function</span>(<span class="at">fun =</span> cd_cont_neg,</span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a>                  <span class="at">args =</span> <span class="fu">list</span>(<span class="at">level =</span> cd_threshold2, <span class="at">model =</span> model),</span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>                  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, x_max_val), <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">colour =</span> <span class="st">"#AFDFFF"</span>)</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a><span class="fu">show_leverage</span>(seoul.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_leverage</span>(seoul.bike.lm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-6-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model.factors <span class="ot">=</span> <span class="fu">setdiff</span>(<span class="fu">c</span>(seoul.change, seoul.interaction), <span class="fu">c</span>(seoul.base, <span class="st">"TemperatureChange"</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>seoul.x <span class="ot">=</span> <span class="fu">as.matrix</span>(seoul.temp[model.factors])</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>seoul.y <span class="ot">=</span> <span class="fu">as.matrix</span>(seoul.temp[<span class="st">"TemperatureChange"</span>])</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>lasso_cv <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> seoul.x,</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>                      <span class="at">y =</span> seoul.y, </span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type.measure =</span> <span class="st">"mse"</span>, </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>                      <span class="at">alpha =</span> <span class="dv">1</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">coef</span>(lasso_cv, <span class="at">s =</span> <span class="st">"lambda.1se"</span>)[<span class="dv">2</span><span class="sc">:</span>(<span class="fu">length</span>(model.factors)<span class="sc">-</span><span class="dv">1</span>)]</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>lasso.factors <span class="ot">=</span> model.factors[<span class="fu">which</span>(d <span class="sc">!=</span> <span class="dv">0</span>)]</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>seoul.lasso <span class="ot">=</span> <span class="fu">lm</span>(TemperatureChange <span class="sc">~</span> <span class="dv">0</span> <span class="sc">+</span> .,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>                                       seoul.temp[<span class="fu">c</span>(<span class="st">"TemperatureChange"</span>,</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>                                       lasso.factors)])</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(seoul.lasso))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = TemperatureChange ~ 0 + ., data = seoul.temp[c("TemperatureChange", 
+    lasso.factors)])
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-8.1576 -0.2931 -0.0779  0.2100  8.0469 
+
+Coefficients:
+                                     Estimate Std. Error t value Pr(&gt;|t|)    
+HumidityChange                      -0.110551   0.001655 -66.806  &lt; 2e-16 ***
+DewPointTempChange                   0.344571   0.007188  47.939  &lt; 2e-16 ***
+WindSpeedChange                      0.054959   0.008701   6.316 2.81e-10 ***
+SolarRadiationChange                 1.198815   0.021412  55.987  &lt; 2e-16 ***
+Hour09Change                        -0.204656   0.023407  -8.743  &lt; 2e-16 ***
+SolarRadiationChangeXHour1015Change  0.496491   0.044546  11.146  &lt; 2e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.549 on 8750 degrees of freedom
+Multiple R-squared:  0.6603,    Adjusted R-squared:   0.66 
+F-statistic:  2834 on 6 and 8750 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>singularities <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"SolarRadiationXHour1"</span>, <span class="st">"SolarRadiationXHour2"</span>, <span class="st">"SolarRadiationXHour3"</span>,</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"SnowfallXIsFunctioningDay"</span>, <span class="st">"SolarRadiationXHour4"</span>,</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"SolarRadiationXHour5"</span>, <span class="st">"SolarRadiationXHour20"</span>, <span class="st">"SolarRadiationXHour21"</span>,</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"SolarRadiationXHour22"</span>, <span class="st">"SolarRadiationXHour23"</span>, <span class="st">"SnowfallXIsSummer"</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>                  <span class="st">"SnowfallXIsAutumn"</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>model.bike.factors <span class="ot">=</span> <span class="fu">setdiff</span>(<span class="fu">c</span>(seoul.bike.factors, seoul.bike.interaction), </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>                             <span class="fu">c</span>(seoul.bike.base, <span class="st">"RentedBikeCount"</span>, singularities))</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>seoul.bike.x <span class="ot">=</span> <span class="fu">as.matrix</span>(seoul[model.bike.factors])</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>seoul.bike.y <span class="ot">=</span> <span class="fu">as.matrix</span>(seoul[<span class="st">"RentedBikeCount"</span>])</span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>lasso_cv <span class="ot">&lt;-</span> <span class="fu">cv.glmnet</span>(<span class="at">x =</span> seoul.bike.x,</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                      <span class="at">y =</span> seoul.bike.y, </span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>                      <span class="at">type.measure =</span> <span class="st">"mse"</span>, </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>                      <span class="at">alpha =</span> <span class="dv">1</span>)</span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>d <span class="ot">=</span> <span class="fu">coef</span>(lasso_cv, <span class="at">s =</span> <span class="st">"lambda.1se"</span>)[<span class="dv">2</span><span class="sc">:</span>(<span class="fu">length</span>(model.bike.factors)<span class="sc">-</span><span class="dv">1</span>)]</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>lasso.bike.factors <span class="ot">=</span> model.bike.factors[<span class="fu">which</span>(d <span class="sc">!=</span> <span class="dv">0</span>)]</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>seoul.bike.lasso <span class="ot">=</span> <span class="fu">lm</span>(RentedBikeCount <span class="sc">~</span> .,</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>                                       seoul[<span class="fu">c</span>(<span class="st">"RentedBikeCount"</span>,</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>                                       lasso.bike.factors)])</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">summary</span>(seoul.bike.lasso))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = RentedBikeCount ~ ., data = seoul[c("RentedBikeCount", 
+    lasso.bike.factors)])
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-3.7317 -0.1592  0.0376  0.2215  3.1248 
+
+Coefficients:
+                              Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)                  5.507e+00  4.999e-02 110.156  &lt; 2e-16 ***
+Humidity6                    2.273e-02  2.396e-02   0.948 0.342942    
+Humidity9                   -8.559e-01  9.373e-02  -9.132  &lt; 2e-16 ***
+Humidity10                  -9.391e-01  9.861e-02  -9.524  &lt; 2e-16 ***
+Temperature                  6.102e-02  2.312e-03  26.391  &lt; 2e-16 ***
+Visibility                  -2.566e-03  1.089e-03  -2.357 0.018445 *  
+SolarRadiation               8.477e-02  1.464e-02   5.792 7.21e-09 ***
+Rainfall                    -3.065e-01  2.338e-02 -13.112  &lt; 2e-16 ***
+Hour1                       -1.021e-01  1.148e-01  -0.890 0.373698    
+Hour2                       -2.947e-01  1.100e-01  -2.680 0.007382 ** 
+Hour3                       -5.896e-01  1.140e-01  -5.174 2.35e-07 ***
+Hour4                       -1.128e+00  1.120e-01 -10.074  &lt; 2e-16 ***
+Hour5                       -1.192e+00  1.152e-01 -10.347  &lt; 2e-16 ***
+Hour6                       -5.557e-01  5.799e-02  -9.582  &lt; 2e-16 ***
+Hour8                        2.013e-01  1.136e-01   1.772 0.076424 .  
+Hour9                        7.757e-02  7.296e-02   1.063 0.287749    
+Hour10                      -8.060e-02  6.880e-02  -1.172 0.241407    
+Hour16                       1.037e-01  1.522e-01   0.681 0.495811    
+Hour17                       4.600e-01  1.507e-01   3.053 0.002276 ** 
+Hour18                       5.704e-01  1.609e-01   3.544 0.000396 ***
+Hour19                       1.243e-01  1.433e-01   0.868 0.385457    
+Hour20                       3.492e-01  1.332e-01   2.622 0.008749 ** 
+Hour22                       1.983e-01  4.487e-02   4.419 1.00e-05 ***
+IsWinter                    -7.924e-02  3.682e-02  -2.152 0.031437 *  
+IsSummer                     1.291e+00  1.215e-01  10.622  &lt; 2e-16 ***
+IsAutumn                     4.423e-01  7.269e-02   6.085 1.21e-09 ***
+TemperatureXDewPointTemp    -5.524e-04  1.094e-04  -5.047 4.57e-07 ***
+TemperatureXSnowfall        -1.482e-02  4.636e-03  -3.197 0.001392 ** 
+WindSpeedXIsHoliday         -5.289e-02  1.990e-02  -2.658 0.007884 ** 
+VisibilityXRainfall         -5.380e-03  5.711e-04  -9.421  &lt; 2e-16 ***
+DewPointTempXSolarRadiation -3.002e-03  1.025e-03  -2.929 0.003415 ** 
+DewPointTempXIsHoliday      -2.281e-03  3.049e-03  -0.748 0.454379    
+SolarRadiationXRainfall     -8.379e-02  7.197e-02  -1.164 0.244371    
+ExtremeWindXRainfall         1.115e-01  3.133e-02   3.561 0.000372 ***
+RainfallXSnowfall            1.058e-02  8.709e-03   1.215 0.224506    
+RainfallXIsHoliday          -2.376e-02  4.811e-02  -0.494 0.621388    
+SnowfallXIsHoliday           4.001e-01  1.169e-01   3.421 0.000626 ***
+Humidity2XHour12            -1.107e-01  1.837e-01  -0.602 0.546915    
+Humidity3XHour4             -2.720e-01  2.127e-01  -1.279 0.200946    
+Humidity3XHour5             -2.709e-01  2.375e-01  -1.141 0.253913    
+Humidity3XHour6             -4.561e-01  2.726e-01  -1.673 0.094329 .  
+Humidity3XHour15             1.107e-02  6.547e-02   0.169 0.865756    
+Humidity4XHour3             -1.538e-01  1.268e-01  -1.213 0.225197    
+Humidity5XHour1             -1.011e-01  8.953e-02  -1.130 0.258611    
+Humidity5XHour2             -7.687e-02  9.005e-02  -0.854 0.393327    
+Humidity5XHour6             -9.993e-02  1.051e-01  -0.951 0.341519    
+Humidity5XHour16             7.198e-02  7.219e-02   0.997 0.318770    
+Humidity5XHour17             5.842e-02  6.794e-02   0.860 0.389889    
+Humidity5XHour18             1.984e-01  6.636e-02   2.990 0.002794 ** 
+Humidity5XHour19             1.038e-01  6.532e-02   1.589 0.112054    
+Humidity5XHour20             5.399e-02  6.552e-02   0.824 0.409920    
+Humidity5XHour21             1.207e-01  7.699e-02   1.568 0.116959    
+Humidity6XHour16             4.489e-02  7.922e-02   0.567 0.570941    
+Humidity6XHour17             3.236e-02  8.588e-02   0.377 0.706314    
+Humidity6XHour18             1.138e-01  7.599e-02   1.498 0.134182    
+Humidity6XHour21             9.205e-02  7.107e-02   1.295 0.195319    
+Humidity6XHour22             9.468e-03  6.398e-02   0.148 0.882366    
+Humidity7XHour2             -9.810e-02  6.638e-02  -1.478 0.139469    
+Humidity7XHour3             -7.421e-02  6.522e-02  -1.138 0.255223    
+Humidity7XHour4             -4.313e-02  6.726e-02  -0.641 0.521377    
+Humidity7XHour5             -1.009e-01  6.978e-02  -1.446 0.148149    
+Humidity7XHour6             -6.021e-02  6.885e-02  -0.875 0.381865    
+Humidity7XHour8              3.019e-01  6.631e-02   4.553 5.36e-06 ***
+Humidity7XHour9              1.772e-01  6.974e-02   2.541 0.011072 *  
+Humidity7XHour18             2.357e-01  9.792e-02   2.407 0.016092 *  
+Humidity7XHour19             1.148e-01  7.930e-02   1.448 0.147669    
+Humidity7XHour21             1.930e-01  7.588e-02   2.544 0.010990 *  
+Humidity8XHour5             -9.425e-02  7.007e-02  -1.345 0.178633    
+Humidity8XHour7              2.663e-01  6.743e-02   3.949 7.91e-05 ***
+Humidity8XHour8              2.052e-01  7.375e-02   2.782 0.005411 ** 
+Humidity8XHour10            -1.902e-01  1.015e-01  -1.874 0.060976 .  
+Humidity8XHour11            -2.335e-01  1.277e-01  -1.829 0.067450 .  
+Humidity8XHour17             3.596e-02  1.297e-01   0.277 0.781565    
+Humidity8XHour19             1.691e-01  1.002e-01   1.687 0.091598 .  
+Humidity9XHour7             -8.793e-02  6.897e-02  -1.275 0.202391    
+Humidity9XHour10            -3.996e-01  1.165e-01  -3.431 0.000604 ***
+Humidity9XHour11            -6.732e-01  1.296e-01  -5.196 2.08e-07 ***
+Humidity9XHour12            -1.052e+00  1.626e-01  -6.467 1.06e-10 ***
+Humidity9XHour13            -6.966e-01  1.594e-01  -4.369 1.26e-05 ***
+Humidity9XHour14            -1.054e+00  1.592e-01  -6.619 3.85e-11 ***
+Humidity9XHour15            -6.708e-01  1.728e-01  -3.881 0.000105 ***
+Humidity9XHour16            -1.095e+00  1.474e-01  -7.431 1.18e-13 ***
+Humidity9XHour17            -6.461e-01  1.364e-01  -4.736 2.21e-06 ***
+Humidity9XHour18            -4.065e-01  1.329e-01  -3.060 0.002224 ** 
+Humidity9XHour20            -3.377e-01  1.016e-01  -3.323 0.000894 ***
+Humidity10XHour1             2.981e-01  1.300e-01   2.293 0.021851 *  
+Humidity10XHour3             3.646e-01  1.266e-01   2.879 0.003996 ** 
+Humidity10XHour4             2.175e-01  1.131e-01   1.923 0.054550 .  
+Humidity10XHour5             3.905e-01  1.117e-01   3.496 0.000475 ***
+Humidity10XHour6             4.483e-01  1.116e-01   4.019 5.90e-05 ***
+Humidity10XHour7             4.551e-01  1.139e-01   3.994 6.54e-05 ***
+Humidity10XHour9            -7.723e-01  1.405e-01  -5.498 3.96e-08 ***
+Humidity10XHour10           -1.447e+00  1.522e-01  -9.508  &lt; 2e-16 ***
+Humidity10XHour11           -1.325e+00  1.393e-01  -9.507  &lt; 2e-16 ***
+Humidity10XHour12           -1.392e+00  1.511e-01  -9.214  &lt; 2e-16 ***
+Humidity10XHour13           -2.063e+00  1.655e-01 -12.465  &lt; 2e-16 ***
+Humidity10XHour14           -1.388e+00  1.743e-01  -7.963 1.90e-15 ***
+Humidity10XHour15           -1.636e+00  1.665e-01  -9.827  &lt; 2e-16 ***
+Humidity10XHour16           -1.439e+00  1.850e-01  -7.779 8.21e-15 ***
+Humidity10XHour17           -1.488e+00  1.617e-01  -9.202  &lt; 2e-16 ***
+Humidity10XHour18           -1.122e+00  1.604e-01  -6.993 2.91e-12 ***
+Humidity10XHour19           -9.634e-01  1.544e-01  -6.240 4.59e-10 ***
+Humidity10XHour20           -1.159e+00  1.355e-01  -8.555  &lt; 2e-16 ***
+Humidity10XHour21           -5.894e-01  1.253e-01  -4.705 2.58e-06 ***
+Humidity10XHour22           -8.695e-01  1.381e-01  -6.297 3.20e-10 ***
+Humidity10XHour23           -5.418e-01  1.314e-01  -4.124 3.76e-05 ***
+TemperatureXHour10          -5.415e-03  2.376e-03  -2.279 0.022668 *  
+TemperatureXHour11          -4.899e-03  2.104e-03  -2.328 0.019923 *  
+TemperatureXHour12          -1.755e-03  2.837e-03  -0.618 0.536307    
+TemperatureXHour17           3.949e-03  3.444e-03   1.147 0.251539    
+TemperatureXHour19           6.777e-03  3.395e-03   1.996 0.045966 *  
+TemperatureXHour20           2.066e-02  2.368e-03   8.726  &lt; 2e-16 ***
+TemperatureXHour21           1.665e-02  2.412e-03   6.901 5.53e-12 ***
+TemperatureXHour22           1.926e-02  2.381e-03   8.089 6.90e-16 ***
+TemperatureXHour23           1.070e-02  3.661e-03   2.924 0.003471 ** 
+WindSpeedXHour1             -6.813e-02  3.159e-02  -2.157 0.031060 *  
+WindSpeedXHour2             -3.092e-02  3.331e-02  -0.928 0.353339    
+WindSpeedXHour3             -7.187e-02  3.307e-02  -2.173 0.029806 *  
+WindSpeedXHour4             -6.040e-02  3.172e-02  -1.904 0.056919 .  
+WindSpeedXHour5             -9.553e-02  3.415e-02  -2.797 0.005165 ** 
+WindSpeedXHour6              2.158e-02  3.685e-02   0.586 0.558127    
+WindSpeedXHour8              2.126e-02  3.439e-02   0.618 0.536352    
+WindSpeedXHour10            -1.464e-02  2.819e-02  -0.519 0.603549    
+WindSpeedXHour11            -2.616e-02  1.699e-02  -1.540 0.123510    
+WindSpeedXHour15             1.678e-02  1.277e-02   1.314 0.188926    
+WindSpeedXHour16             4.795e-03  2.640e-02   0.182 0.855871    
+WindSpeedXHour18             2.181e-02  2.717e-02   0.803 0.422185    
+VisibilityXHour1             2.357e-03  2.919e-03   0.808 0.419388    
+VisibilityXHour2             6.242e-03  2.838e-03   2.200 0.027864 *  
+VisibilityXHour3             6.666e-03  2.910e-03   2.291 0.021986 *  
+VisibilityXHour4             3.441e-03  2.843e-03   1.210 0.226160    
+VisibilityXHour5            -1.244e-03  2.852e-03  -0.436 0.662719    
+VisibilityXHour8            -6.751e-03  2.866e-03  -2.355 0.018533 *  
+VisibilityXHour16            2.350e-04  3.487e-03   0.067 0.946265    
+VisibilityXHour17            2.173e-03  3.577e-03   0.608 0.543449    
+VisibilityXHour18            7.945e-05  3.570e-03   0.022 0.982247    
+VisibilityXHour19           -5.479e-03  3.497e-03  -1.567 0.117197    
+VisibilityXHour20            2.733e-03  3.314e-03   0.825 0.409458    
+VisibilityXHour21           -5.145e-03  1.353e-03  -3.803 0.000144 ***
+DewPointTempXHour7          -1.082e-02  2.762e-03  -3.918 9.02e-05 ***
+DewPointTempXHour8          -1.476e-02  2.241e-03  -6.585 4.82e-11 ***
+DewPointTempXHour9          -1.240e-02  3.103e-03  -3.996 6.51e-05 ***
+DewPointTempXHour12         -1.110e-04  3.434e-03  -0.032 0.974215    
+DewPointTempXHour23          7.163e-03  4.183e-03   1.712 0.086895 .  
+SolarRadiationXHour6         3.856e+00  1.792e+00   2.152 0.031420 *  
+SolarRadiationXHour7         5.942e-01  1.915e-01   3.103 0.001919 ** 
+SolarRadiationXHour9         3.501e-02  6.103e-02   0.574 0.566201    
+SolarRadiationXHour16        4.230e-02  4.099e-02   1.032 0.302131    
+SolarRadiationXHour17        8.170e-03  7.308e-02   0.112 0.910991    
+SolarRadiationXHour18        1.456e-01  7.248e-02   2.008 0.044634 *  
+SolarRadiationXHour19        6.071e-01  2.246e-01   2.703 0.006893 ** 
+ExtremeWindXHour6           -3.540e-01  2.954e-01  -1.198 0.230910    
+RainfallXHour1              -2.429e-01  5.271e-02  -4.608 4.13e-06 ***
+RainfallXHour2              -1.130e-01  4.421e-02  -2.557 0.010572 *  
+RainfallXHour3              -1.680e-01  4.733e-02  -3.550 0.000387 ***
+RainfallXHour4               2.117e-02  2.604e-02   0.813 0.416347    
+RainfallXHour6              -2.428e-01  4.172e-02  -5.820 6.12e-09 ***
+RainfallXHour7              -9.331e-02  2.916e-02  -3.200 0.001381 ** 
+RainfallXHour8              -5.062e-02  2.566e-02  -1.973 0.048543 *  
+RainfallXHour9               6.993e-02  2.715e-02   2.575 0.010033 *  
+RainfallXHour10             -5.248e-02  3.418e-02  -1.536 0.124642    
+RainfallXHour13              1.932e-01  1.994e-02   9.686  &lt; 2e-16 ***
+RainfallXHour14              5.167e-02  7.008e-02   0.737 0.460911    
+RainfallXHour15              2.121e-01  3.980e-02   5.331 1.00e-07 ***
+RainfallXHour16             -3.171e-03  7.875e-02  -0.040 0.967885    
+RainfallXHour18              1.449e-01  1.996e-02   7.258 4.28e-13 ***
+RainfallXHour19             -1.205e-01  4.818e-02  -2.501 0.012411 *  
+RainfallXHour22             -2.815e-01  5.392e-02  -5.221 1.82e-07 ***
+RainfallXHour23             -2.137e-01  6.065e-02  -3.523 0.000429 ***
+SnowfallXHour7              -1.779e-01  5.988e-02  -2.971 0.002973 ** 
+SnowfallXHour10             -4.869e-02  4.247e-02  -1.146 0.251688    
+SnowfallXHour12              1.017e-01  5.135e-02   1.980 0.047737 *  
+SnowfallXHour13             -1.754e-02  5.503e-02  -0.319 0.749899    
+IsHolidayXHour1              2.271e-01  1.231e-01   1.845 0.065107 .  
+IsHolidayXHour2              3.598e-01  1.230e-01   2.925 0.003459 ** 
+IsHolidayXHour3              3.963e-01  1.228e-01   3.228 0.001251 ** 
+IsHolidayXHour4              3.187e-01  1.225e-01   2.602 0.009274 ** 
+IsHolidayXHour6             -5.665e-01  1.238e-01  -4.575 4.83e-06 ***
+IsHolidayXHour7             -9.259e-01  1.218e-01  -7.600 3.29e-14 ***
+IsHolidayXHour8             -9.920e-01  1.217e-01  -8.151 4.15e-16 ***
+IsHolidayXHour9             -4.560e-01  1.235e-01  -3.693 0.000223 ***
+IsHolidayXHour10            -1.651e-01  1.231e-01  -1.341 0.179967    
+IsHolidayXHour13             2.059e-01  1.247e-01   1.651 0.098696 .  
+IsHolidayXHour14             3.034e-01  1.254e-01   2.419 0.015593 *  
+IsHolidayXHour15             2.970e-01  1.276e-01   2.328 0.019928 *  
+IsHolidayXHour16             2.796e-01  1.274e-01   2.195 0.028198 *  
+IsHolidayXHour18            -2.565e-01  1.256e-01  -2.042 0.041163 *  
+IsHolidayXHour19            -1.358e-01  1.251e-01  -1.086 0.277475    
+IsHolidayXHour20            -2.268e-01  1.240e-01  -1.829 0.067498 .  
+IsHolidayXHour21            -2.202e-01  1.240e-01  -1.776 0.075699 .  
+IsHolidayXHour22            -3.005e-01  1.242e-01  -2.419 0.015594 *  
+Humidity2XIsAutumn          -3.279e-01  1.407e-01  -2.331 0.019777 *  
+Humidity3XIsSummer          -2.398e-02  1.676e-01  -0.143 0.886220    
+Humidity4XIsSummer          -9.575e-02  1.006e-01  -0.952 0.341088    
+Humidity5XIsSummer           8.957e-02  6.765e-02   1.324 0.185549    
+Humidity5XIsAutumn           2.527e-02  3.606e-02   0.701 0.483510    
+Humidity7XIsWinter          -3.275e-02  4.357e-02  -0.752 0.452296    
+Humidity8XIsWinter          -5.999e-02  4.702e-02  -1.276 0.202071    
+Humidity8XIsSummer           5.780e-02  6.137e-02   0.942 0.346251    
+Humidity9XIsSummer           2.427e-01  9.236e-02   2.628 0.008615 ** 
+Humidity9XIsAutumn           1.818e-01  5.149e-02   3.530 0.000417 ***
+Humidity10XIsWinter          4.096e-01  8.752e-02   4.680 2.92e-06 ***
+Humidity10XIsSummer          1.289e-01  1.085e-01   1.189 0.234619    
+Humidity10XIsAutumn         -1.256e-01  7.832e-02  -1.603 0.108941    
+TemperatureXIsWinter        -2.075e-02  4.225e-03  -4.911 9.23e-07 ***
+TemperatureXIsSummer        -5.525e-02  1.099e-02  -5.027 5.08e-07 ***
+WindSpeedXIsWinter          -2.798e-02  1.123e-02  -2.493 0.012704 *  
+WindSpeedXIsSummer           4.667e-02  1.522e-02   3.067 0.002172 ** 
+VisibilityXIsAutumn          2.327e-03  1.772e-03   1.313 0.189107    
+DewPointTempXIsSummer       -7.586e-03  1.141e-02  -0.665 0.506147    
+DewPointTempXIsAutumn       -2.080e-02  2.098e-03  -9.914  &lt; 2e-16 ***
+SolarRadiationXIsSummer      1.210e-02  2.599e-02   0.465 0.641600    
+ExtremeWindXIsSummer        -2.030e-01  9.390e-02  -2.162 0.030629 *  
+RainfallXIsWinter           -3.366e-02  3.497e-02  -0.962 0.335843    
+RainfallXIsSummer            9.179e-02  1.598e-02   5.744 9.60e-09 ***
+RainfallXIsAutumn           -4.166e-02  2.323e-02  -1.794 0.072924 .  
+SnowfallXIsWinter           -1.028e-01  2.662e-02  -3.862 0.000113 ***
+IsHolidayXIsWinter          -4.322e-01  7.643e-02  -5.656 1.61e-08 ***
+IsHolidayXIsAutumn          -2.197e-01  6.322e-02  -3.475 0.000514 ***
+Hour1XIsSummer               1.622e-01  6.415e-02   2.528 0.011496 *  
+Hour2XIsSummer               1.444e-01  6.365e-02   2.268 0.023359 *  
+Hour3XIsSummer               1.048e-01  6.336e-02   1.654 0.098242 .  
+Hour4XIsSummer               1.026e-01  6.304e-02   1.628 0.103651    
+Hour5XIsSummer               1.379e-01  6.369e-02   2.166 0.030360 *  
+Hour6XIsWinter              -1.152e-01  6.720e-02  -1.714 0.086492 .  
+Hour7XIsAutumn               2.100e-01  6.268e-02   3.351 0.000809 ***
+Hour8XIsAutumn               5.559e-02  6.265e-02   0.887 0.374922    
+Hour9XIsWinter               4.586e-02  9.289e-02   0.494 0.621492    
+Hour11XIsAutumn             -9.901e-02  6.193e-02  -1.599 0.109942    
+Hour12XIsSummer             -1.021e-01  8.645e-02  -1.181 0.237535    
+Hour13XIsSummer             -1.419e-01  6.229e-02  -2.279 0.022706 *  
+Hour13XIsAutumn             -1.629e-01  5.924e-02  -2.750 0.005980 ** 
+Hour14XIsSummer             -1.222e-01  6.106e-02  -2.002 0.045335 *  
+Hour14XIsAutumn             -1.009e-01  5.882e-02  -1.716 0.086245 .  
+Hour16XIsAutumn             -1.817e-03  6.526e-02  -0.028 0.977794    
+Hour17XIsAutumn              3.166e-02  6.988e-02   0.453 0.650568    
+Hour18XIsAutumn              8.731e-02  6.911e-02   1.263 0.206509    
+Hour19XIsAutumn              6.921e-02  7.398e-02   0.936 0.349547    
+TemperatureXHumidity9        2.375e-01  3.168e-02   7.497 7.20e-14 ***
+WindSpeedXHumidity2         -7.697e-03  2.719e-02  -0.283 0.777126    
+WindSpeedXHumidity4         -3.890e-04  1.389e-02  -0.028 0.977661    
+WindSpeedXHumidity9         -5.830e-02  2.068e-02  -2.820 0.004821 ** 
+WindSpeedXHumidity10        -4.734e-02  2.673e-02  -1.771 0.076603 .  
+VisibilityXHumidity4        -6.417e-04  8.734e-04  -0.735 0.462553    
+VisibilityXHumidity10        1.048e-02  2.555e-03   4.100 4.17e-05 ***
+DewPointTempXHumidity5      -4.635e-03  1.687e-03  -2.748 0.006015 ** 
+DewPointTempXHumidity7       1.238e-03  2.197e-03   0.564 0.572956    
+DewPointTempXHumidity9      -2.394e-01  3.244e-02  -7.380 1.73e-13 ***
+SolarRadiationXHumidity2    -4.442e-02  4.881e-02  -0.910 0.362799    
+SolarRadiationXHumidity6     5.395e-02  2.118e-02   2.547 0.010871 *  
+SolarRadiationXHumidity7     1.186e-01  3.113e-02   3.809 0.000140 ***
+SolarRadiationXHumidity8     1.935e-01  5.301e-02   3.651 0.000263 ***
+SolarRadiationXHumidity9     9.854e-01  1.183e-01   8.331  &lt; 2e-16 ***
+SolarRadiationXHumidity10    2.801e+00  2.068e-01  13.548  &lt; 2e-16 ***
+ExtremeWindXHumidity6       -1.845e-01  7.226e-02  -2.553 0.010684 *  
+ExtremeWindXHumidity7       -7.596e-02  8.724e-02  -0.871 0.383930    
+ExtremeWindXHumidity8       -4.423e-01  1.222e-01  -3.619 0.000298 ***
+ExtremeWindXHumidity10       8.018e-01  1.813e-01   4.422 9.88e-06 ***
+RainfallXHumidity5          -6.388e+00  1.645e+00  -3.883 0.000104 ***
+RainfallXHumidity7          -3.904e+00  3.627e-01 -10.765  &lt; 2e-16 ***
+RainfallXHumidity8          -6.812e-01  1.533e-01  -4.442 9.01e-06 ***
+RainfallXHumidity9          -4.378e-01  3.173e-02 -13.797  &lt; 2e-16 ***
+SnowfallXHumidity8          -5.029e-02  4.654e-02  -1.081 0.279917    
+SnowfallXHumidity9           4.160e-02  2.818e-02   1.476 0.139953    
+SnowfallXHumidity10          1.326e-01  3.275e-02   4.047 5.23e-05 ***
+IsHolidayXHumidity4         -4.088e-02  7.204e-02  -0.568 0.570389    
+IsHolidayXHumidity5          1.208e-01  7.874e-02   1.534 0.125098    
+IsHolidayXHumidity6          2.445e-01  7.303e-02   3.348 0.000817 ***
+IsHolidayXHumidity8          2.611e-01  8.115e-02   3.217 0.001299 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 0.4628 on 8196 degrees of freedom
+Multiple R-squared:  0.8442,    Adjusted R-squared:  0.8391 
+F-statistic: 165.7 on 268 and 8196 DF,  p-value: &lt; 2.2e-16</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.bike.base.model = lm(RentedBikeCount ~ 1, seoul[c("RentedBikeCount", model.bike.factors)])</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.bike.full.model = lm(RentedBikeCount ~ ., seoul[c("RentedBikeCount", model.bike.factors)])</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.bike.step = step(seoul.bike.base.model,</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="co">#                        direction = "both",</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="co">#                        k = log(nrow(seoul)),</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="co">#                        scope = list(lower=seoul.bike.base.model,</span></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co">#                                     upper=seoul.bike.full.model))</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="co"># print(summary(seoul.bike.step))</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.base.models = create_season_models(model.factors,</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co">#                                          "TemperatureChange",</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="co">#                                          base = T)</span></span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.full.models = create_season_models(model.factors,</span></span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a><span class="co">#                                          "TemperatureChange")</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-19"><a href="#cb23-19" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-20"><a href="#cb23-20" aria-hidden="true" tabindex="-1"></a><span class="co"># #Stepwise BIC</span></span>
+<span id="cb23-21"><a href="#cb23-21" aria-hidden="true" tabindex="-1"></a><span class="co"># create_season_stepwise = function(base_models, </span></span>
+<span id="cb23-22"><a href="#cb23-22" aria-hidden="true" tabindex="-1"></a><span class="co">#                                   full_models){</span></span>
+<span id="cb23-23"><a href="#cb23-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   models = list()</span></span>
+<span id="cb23-24"><a href="#cb23-24" aria-hidden="true" tabindex="-1"></a><span class="co">#   for(m in 1:length(base_models)){</span></span>
+<span id="cb23-25"><a href="#cb23-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     base.model = base_models[[m]]</span></span>
+<span id="cb23-26"><a href="#cb23-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     full.model = full_models[[m]]</span></span>
+<span id="cb23-27"><a href="#cb23-27" aria-hidden="true" tabindex="-1"></a><span class="co">#     season = unique(seoul$Seasons)[m]</span></span>
+<span id="cb23-28"><a href="#cb23-28" aria-hidden="true" tabindex="-1"></a><span class="co">#     </span></span>
+<span id="cb23-29"><a href="#cb23-29" aria-hidden="true" tabindex="-1"></a><span class="co">#     models[[str_c("seoul.stepwise.",season)]] &lt;- step(base.model,</span></span>
+<span id="cb23-30"><a href="#cb23-30" aria-hidden="true" tabindex="-1"></a><span class="co">#          direction="both",</span></span>
+<span id="cb23-31"><a href="#cb23-31" aria-hidden="true" tabindex="-1"></a><span class="co">#          k = log(nrow(seoul[seoul$Seasons == season,])),</span></span>
+<span id="cb23-32"><a href="#cb23-32" aria-hidden="true" tabindex="-1"></a><span class="co">#          scope=list(lower=base.model,</span></span>
+<span id="cb23-33"><a href="#cb23-33" aria-hidden="true" tabindex="-1"></a><span class="co">#                      upper=full.model))</span></span>
+<span id="cb23-34"><a href="#cb23-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb23-35"><a href="#cb23-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   return(models)</span></span>
+<span id="cb23-36"><a href="#cb23-36" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb23-37"><a href="#cb23-37" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-38"><a href="#cb23-38" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.stepwise.bic.models = create_season_stepwise(seoul.base.models,</span></span>
+<span id="cb23-39"><a href="#cb23-39" aria-hidden="true" tabindex="-1"></a><span class="co">#                                                    seoul.full.models)</span></span>
+<span id="cb23-40"><a href="#cb23-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-41"><a href="#cb23-41" aria-hidden="true" tabindex="-1"></a><span class="co"># for(model in seoul.stepwise.bic.models){</span></span>
+<span id="cb23-42"><a href="#cb23-42" aria-hidden="true" tabindex="-1"></a><span class="co">#   print(summary(model))</span></span>
+<span id="cb23-43"><a href="#cb23-43" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb23-44"><a href="#cb23-44" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb23-45"><a href="#cb23-45" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(seoul.stepwise.bic)</span></span>
+<span id="cb23-46"><a href="#cb23-46" aria-hidden="true" tabindex="-1"></a><span class="co"># length(seoul.stepwise.bic$coefficients)</span></span>
+<span id="cb23-47"><a href="#cb23-47" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb23-48"><a href="#cb23-48" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul$step.residuals = seoul.stepwise.bic$residuals</span></span>
+<span id="cb23-49"><a href="#cb23-49" aria-hidden="true" tabindex="-1"></a><span class="co">#</span></span>
+<span id="cb23-50"><a href="#cb23-50" aria-hidden="true" tabindex="-1"></a><span class="co"># create_lasso = function(){</span></span>
+<span id="cb23-51"><a href="#cb23-51" aria-hidden="true" tabindex="-1"></a><span class="co">#   models = list()</span></span>
+<span id="cb23-52"><a href="#cb23-52" aria-hidden="true" tabindex="-1"></a><span class="co">#   seasons = seoul$Seasons %&gt;% unique()</span></span>
+<span id="cb23-53"><a href="#cb23-53" aria-hidden="true" tabindex="-1"></a><span class="co">#   for(s in seasons){</span></span>
+<span id="cb23-54"><a href="#cb23-54" aria-hidden="true" tabindex="-1"></a><span class="co">#     #print(s)</span></span>
+<span id="cb23-55"><a href="#cb23-55" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul.subset = seoul %&gt;% filter(Seasons == s)</span></span>
+<span id="cb23-56"><a href="#cb23-56" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul.x = as.matrix(seoul.subset[model.factors])</span></span>
+<span id="cb23-57"><a href="#cb23-57" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul.y = as.matrix(seoul.subset["TemperatureChange"])</span></span>
+<span id="cb23-58"><a href="#cb23-58" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb23-59"><a href="#cb23-59" aria-hidden="true" tabindex="-1"></a><span class="co">#     lasso_cv &lt;- cv.glmnet(x = seoul.x,</span></span>
+<span id="cb23-60"><a href="#cb23-60" aria-hidden="true" tabindex="-1"></a><span class="co">#                           y = seoul.y, </span></span>
+<span id="cb23-61"><a href="#cb23-61" aria-hidden="true" tabindex="-1"></a><span class="co">#                           type.measure = "mse", </span></span>
+<span id="cb23-62"><a href="#cb23-62" aria-hidden="true" tabindex="-1"></a><span class="co">#                           alpha = 1)</span></span>
+<span id="cb23-63"><a href="#cb23-63" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb23-64"><a href="#cb23-64" aria-hidden="true" tabindex="-1"></a><span class="co">#     d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.factors)-1)]</span></span>
+<span id="cb23-65"><a href="#cb23-65" aria-hidden="true" tabindex="-1"></a><span class="co">#     lasso.factors = model.factors[which(d != 0)]</span></span>
+<span id="cb23-66"><a href="#cb23-66" aria-hidden="true" tabindex="-1"></a><span class="co">#     models[[str_c("seoul.lasso.",s)]] = lm(TemperatureChange ~ 0 + .,</span></span>
+<span id="cb23-67"><a href="#cb23-67" aria-hidden="true" tabindex="-1"></a><span class="co">#                                            seoul.subset[c("TemperatureChange",</span></span>
+<span id="cb23-68"><a href="#cb23-68" aria-hidden="true" tabindex="-1"></a><span class="co">#                                            lasso.factors)])</span></span>
+<span id="cb23-69"><a href="#cb23-69" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb23-70"><a href="#cb23-70" aria-hidden="true" tabindex="-1"></a><span class="co">#   return(models)</span></span>
+<span id="cb23-71"><a href="#cb23-71" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb23-72"><a href="#cb23-72" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.lasso.models = create_lasso()</span></span>
+<span id="cb23-73"><a href="#cb23-73" aria-hidden="true" tabindex="-1"></a><span class="co"># for(model in seoul.lasso.models){</span></span>
+<span id="cb23-74"><a href="#cb23-74" aria-hidden="true" tabindex="-1"></a><span class="co">#   print(summary(model))</span></span>
+<span id="cb23-75"><a href="#cb23-75" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># epsilon = 0.5</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="co"># t = seoul %&gt;% filter(abs(RainfallChange) &gt;= epsilon) %&gt;% mutate(</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   RainfallChange = RainfallChange + abs(min(RainfallChange)) + 1,</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   TemperatureChange = TemperatureChange #+ abs(min(TemperatureChange)) + 1</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># t %&gt;% ggplot()+</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(x=RainfallChange, y=TemperatureChange))</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># # t$Rainfall = t$Rainfall^1.5</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="co"># invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="co"># bc = boxCox(t$TemperatureChange ~ t$Rainfall)</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># lambda = bc$x[which(bc$y == max(bc$y))]</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a><span class="co"># lambda</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="co"># t$TemperatureChange = t$TemperatureChange^2</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co"># invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)</span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="co"># t %&gt;% ggplot()+</span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(x=RainfallChange, y=TemperatureChange))</span></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a><span class="co"># invTranPlot(TemperatureChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a><span class="co"># t = seoul %&gt;% mutate(</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a><span class="co">#     SnowfallChange = SnowfallChange + abs(min(SnowfallChange)) + 1,</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a><span class="co">#     TemperatureChange = TemperatureChange + abs(min(TemperatureChange)) + 1</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a><span class="co"># invTranPlot(TemperatureChange ~ SnowfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)</span></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul %&gt;% ggplot()+</span></span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(aes(x=SnowfallChange, y=TemperatureChange))</span></span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a><span class="co"># snowfall.lm = lm(TemperatureChange ~ Snowfall, data=t)</span></span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(snowfall.lm)</span></span>
+<span id="cb24-35"><a href="#cb24-35" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-36"><a href="#cb24-36" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul %&gt;% mutate(</span></span>
+<span id="cb24-37"><a href="#cb24-37" aria-hidden="true" tabindex="-1"></a><span class="co">#   Snowfall = ifelse(</span></span>
+<span id="cb24-38"><a href="#cb24-38" aria-hidden="true" tabindex="-1"></a><span class="co">#     Snowfall == 0, 0,</span></span>
+<span id="cb24-39"><a href="#cb24-39" aria-hidden="true" tabindex="-1"></a><span class="co">#     predict(snowfall.lm, seoul)</span></span>
+<span id="cb24-40"><a href="#cb24-40" aria-hidden="true" tabindex="-1"></a><span class="co">#   )</span></span>
+<span id="cb24-41"><a href="#cb24-41" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span>
+<span id="cb24-42"><a href="#cb24-42" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb24-43"><a href="#cb24-43" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul %&gt;% mutate(</span></span>
+<span id="cb24-44"><a href="#cb24-44" aria-hidden="true" tabindex="-1"></a><span class="co">#   IsRainDifference = abs(RainfallChange) &gt;= epsilon,</span></span>
+<span id="cb24-45"><a href="#cb24-45" aria-hidden="true" tabindex="-1"></a><span class="co">#   IsSnowing = ifelse(</span></span>
+<span id="cb24-46"><a href="#cb24-46" aria-hidden="true" tabindex="-1"></a><span class="co">#     Snowfall == 0, 0,</span></span>
+<span id="cb24-47"><a href="#cb24-47" aria-hidden="true" tabindex="-1"></a><span class="co">#     predict(snowfall.lm, seoul)</span></span>
+<span id="cb24-48"><a href="#cb24-48" aria-hidden="true" tabindex="-1"></a><span class="co">#   )</span></span>
+<span id="cb24-49"><a href="#cb24-49" aria-hidden="true" tabindex="-1"></a><span class="co"># )</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for(effect in weather_effects){</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   for(hour in hours){</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="co">#     factor = str_c(effect, "X", hour)</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul.factors = c(seoul.factors, factor)</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul[factor] = seoul[effect]*seoul[hour]</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a><span class="co">#     seoul.interaction = c(seoul.interaction, factor)</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   }</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul.interaction.lm = lm(TemperatureChange ~ ., seoul[setdiff(seoul.factors, seoul.base)])</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="co"># seoul$interaction.residuals = seoul.interaction.lm$residuals</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># summary(seoul.interaction.lm)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour09 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Hour09, y = interaction.residuals)) +</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour1015 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Hour1015, y = interaction.residuals)) +</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_humidity &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Humidity, y = interaction.residuals)) +</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_windspeed &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = WindSpeed, y = interaction.residuals)) +</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_visibility &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Visibility, y = interaction.residuals)) +</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_solarradiation &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarRadiation, y = interaction.residuals)) +</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_rainfall &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Rainfall, y = interaction.residuals)) +</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_snowfall &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Snowfall, y = interaction.residuals)) +</span></span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_issummer &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsSummer, y = interaction.residuals)) +</span></span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_iswinter &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsWinter, y = interaction.residuals)) +</span></span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-40"><a href="#cb27-40" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-41"><a href="#cb27-41" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_isspring &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb27-42"><a href="#cb27-42" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsSpring, y = interaction.residuals)) +</span></span>
+<span id="cb27-43"><a href="#cb27-43" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb27-44"><a href="#cb27-44" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb27-45"><a href="#cb27-45" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour09</span></span>
+<span id="cb27-46"><a href="#cb27-46" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour1015</span></span>
+<span id="cb27-47"><a href="#cb27-47" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_humidity</span></span>
+<span id="cb27-48"><a href="#cb27-48" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_windspeed</span></span>
+<span id="cb27-49"><a href="#cb27-49" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_visibility</span></span>
+<span id="cb27-50"><a href="#cb27-50" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_solarradiation</span></span>
+<span id="cb27-51"><a href="#cb27-51" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_rainfall</span></span>
+<span id="cb27-52"><a href="#cb27-52" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_snowfall</span></span>
+<span id="cb27-53"><a href="#cb27-53" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_issummer</span></span>
+<span id="cb27-54"><a href="#cb27-54" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_iswinter</span></span>
+<span id="cb27-55"><a href="#cb27-55" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_isspring</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour09 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Hour09, y = step.residuals)) +</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour1015 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Hour1015, y = step.residuals)) +</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_humidity &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Humidity, y = step.residuals)) +</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_windspeed &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = WindSpeed, y = step.residuals)) +</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_solarradiation &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarRadiation, y = step.residuals)) +</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_rainfall &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Rainfall, y = step.residuals)) +</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_snowfall &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = Snowfall, y = step.residuals)) +</span></span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-29"><a href="#cb28-29" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_issummer &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-30"><a href="#cb28-30" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsSummer, y = step.residuals)) +</span></span>
+<span id="cb28-31"><a href="#cb28-31" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-32"><a href="#cb28-32" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-33"><a href="#cb28-33" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_iswinter &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-34"><a href="#cb28-34" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsWinter, y = step.residuals)) +</span></span>
+<span id="cb28-35"><a href="#cb28-35" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-36"><a href="#cb28-36" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-37"><a href="#cb28-37" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_isspring &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-38"><a href="#cb28-38" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = IsSpring, y = step.residuals)) +</span></span>
+<span id="cb28-39"><a href="#cb28-39" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-40"><a href="#cb28-40" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-41"><a href="#cb28-41" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">###</span><span class="co"> Interaction Effects</span></span>
+<span id="cb28-42"><a href="#cb28-42" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-43"><a href="#cb28-43" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxh10 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-44"><a href="#cb28-44" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarXHour1015, y = step.residuals)) +</span></span>
+<span id="cb28-45"><a href="#cb28-45" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-46"><a href="#cb28-46" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-47"><a href="#cb28-47" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxs &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-48"><a href="#cb28-48" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarXIsSummer, y = step.residuals)) +</span></span>
+<span id="cb28-49"><a href="#cb28-49" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-50"><a href="#cb28-50" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-51"><a href="#cb28-51" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxh09 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-52"><a href="#cb28-52" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarXHour09, y = step.residuals)) +</span></span>
+<span id="cb28-53"><a href="#cb28-53" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-54"><a href="#cb28-54" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-55"><a href="#cb28-55" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hxh09 &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-56"><a href="#cb28-56" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = HumidityXHour09, y = step.residuals)) +</span></span>
+<span id="cb28-57"><a href="#cb28-57" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-58"><a href="#cb28-58" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-59"><a href="#cb28-59" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxw &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-60"><a href="#cb28-60" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarXIsWinter, y = step.residuals)) +</span></span>
+<span id="cb28-61"><a href="#cb28-61" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-62"><a href="#cb28-62" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-63"><a href="#cb28-63" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxsp &lt;- ggplot(data = seoul) +</span></span>
+<span id="cb28-64"><a href="#cb28-64" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(mapping = aes(x = SolarXIsSpring, y = step.residuals)) +</span></span>
+<span id="cb28-65"><a href="#cb28-65" aria-hidden="true" tabindex="-1"></a><span class="co">#   theme(aspect.ratio = 1)</span></span>
+<span id="cb28-66"><a href="#cb28-66" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-67"><a href="#cb28-67" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-68"><a href="#cb28-68" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour09</span></span>
+<span id="cb28-69"><a href="#cb28-69" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hour1015</span></span>
+<span id="cb28-70"><a href="#cb28-70" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_humidity</span></span>
+<span id="cb28-71"><a href="#cb28-71" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_windspeed</span></span>
+<span id="cb28-72"><a href="#cb28-72" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_solarradiation</span></span>
+<span id="cb28-73"><a href="#cb28-73" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_rainfall</span></span>
+<span id="cb28-74"><a href="#cb28-74" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_snowfall</span></span>
+<span id="cb28-75"><a href="#cb28-75" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_issummer</span></span>
+<span id="cb28-76"><a href="#cb28-76" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_iswinter</span></span>
+<span id="cb28-77"><a href="#cb28-77" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_isspring</span></span>
+<span id="cb28-78"><a href="#cb28-78" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb28-79"><a href="#cb28-79" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxh09</span></span>
+<span id="cb28-80"><a href="#cb28-80" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxh10</span></span>
+<span id="cb28-81"><a href="#cb28-81" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxs</span></span>
+<span id="cb28-82"><a href="#cb28-82" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxsp</span></span>
+<span id="cb28-83"><a href="#cb28-83" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_sxw</span></span>
+<span id="cb28-84"><a href="#cb28-84" aria-hidden="true" tabindex="-1"></a><span class="co"># resid_vs_hxh09</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for(m in 1:length(seoul.lasso.models)){</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   model = models[[m]] </span></span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   plot = autoplot(model) +</span></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     ggtitle(unique(seoul$Seasons)[m]) +</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a><span class="co">#     theme(aspect.ratio = 1)</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   print(plot)</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(seoul.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(seoul.bike.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_leverage</span>(seoul.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_leverage</span>(seoul.bike.lasso)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-14-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="conclusions" class="level1">
+<h1>3 Conclusions</h1>
+<!-- $\Delta \text{Temperature}_t = \beta_0 + \beta_1I(0\leq\text{Hour}_t<10) + \beta_2I(10\leq\text{Hour}_t<16) + \beta_3\text{Humidity}_t + \beta_4\text{WindSpeed}_t + \beta_5\text{Visibility}_t + \beta_6\text{SolarRadiation}_t + \beta_7\text{Snowfall}_t +\beta_8I(\text{Season}_t = \text{Winter}) + \beta_9I(\text{Season}_t = \text{Summer}) + \beta_{10}\text{SolarRadiation}_tI(\text{Season}_t = \text{Spring}) + \beta_{11}\text{SolarRadiation}_tI(\text{Season}_t = \text{Winter}) + \beta_{12}\text{SolarRadiation}_tI(\text{Season}_t = \text{Summer}) + \beta_{13}\text{SolarRadiation}_tI(0\leq\text{Hour}_t<10) + \beta_{14}\text{WindSpeed}_tI(0\leq\text{Hour}_t<10) + \beta_{15}\text{WindSpeed}_tI(10\leq\text{Hour}_t<15) + \beta_{16}\text{Visibility}_tI(0\leq\text{Hour}_t<10) + \beta{17}\text{Rainfall}_tI(0\leq\text{Hour}_t<10) + \beta{18}\text{Rainfall}_tI(11\leq\text{Hour}_t<16) + \beta{19}\text{Snowfall}_tI(0\leq\text{Hour}_t<10) + \epsilon_i$ -->
+<p><span class="math inline">\(\epsilon_i \overset{iid}{\sim} N(0, \sigma^2)\)</span></p>
+<p>Give additional context to you results and interpretations from Section 5 with respect to the data set and its purpose. Describe any potential weaknesses in your analysis, and how they may affect the reliability of the results.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>seoul.temp<span class="sc">$</span>PredictedTemperatureChange <span class="ot">=</span> <span class="fu">predict</span>(seoul.lasso, seoul.temp)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>seoul.temp<span class="sc">$</span>PredictedTemperature <span class="ot">=</span> <span class="cn">NA_real_</span></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(s <span class="cf">in</span> seasons){</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">=</span> Temp <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Seasons <span class="sc">==</span> s) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(Temperature) <span class="sc">%&gt;%</span></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">lag</span>(<span class="at">n=</span><span class="dv">1</span>)</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  temp <span class="ot">=</span> temp[<span class="sc">!</span><span class="fu">is.na</span>(temp)]</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  seoul.temp[seoul.temp<span class="sc">$</span>Seasons <span class="sc">==</span> s,]<span class="sc">$</span>PredictedTemperature <span class="ot">=</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>    seoul.temp[seoul.temp<span class="sc">$</span>Seasons <span class="sc">==</span> s,]<span class="sc">$</span>PredictedTemperatureChange <span class="sc">+</span></span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>    temp</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a>seoul.temp <span class="sc">%&gt;%</span></span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span>TemperatureChange, <span class="at">color=</span><span class="st">"Actual"</span>), <span class="at">alpha=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span>PredictedTemperatureChange,</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>                <span class="at">color=</span><span class="st">"Predicted"</span>), <span class="at">alpha=</span><span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Predicted Temperature Change in Seoul Over Time"</span>,</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>       <span class="at">color=</span><span class="cn">NULL</span>)<span class="sc">+</span></span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Time"</span>)<span class="sc">+</span></span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="fu">expression</span>(Delta<span class="sc">~</span>Temperature))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="1152"></p>
+</div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>seoul.temp <span class="sc">%&gt;%</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span>Temperature, <span class="at">color=</span><span class="st">"Actual"</span>), <span class="at">alpha=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span>PredictedTemperature,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">color=</span><span class="st">"Predicted"</span>), <span class="at">alpha=</span><span class="fl">0.6</span>)<span class="sc">+</span></span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Predicted Temperature in Seoul Over Time"</span>,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">color=</span><span class="cn">NULL</span>)<span class="sc">+</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Time"</span>)<span class="sc">+</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="fu">expression</span>(Temperature))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-16-2.png" class="img-fluid" width="1152"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>seoul<span class="sc">$</span>PredictedRentedBikeCount <span class="ot">=</span> <span class="fu">predict</span>(seoul.bike.lasso, seoul)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>seoul<span class="sc">$</span>residual <span class="ot">=</span> seoul<span class="sc">$</span>PredictedRentedBikeCount <span class="sc">-</span> seoul<span class="sc">$</span>RentedBikeCount</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a><span class="co">#step.factors = seoul.bike.step$coefficients %&gt;% names() %&gt;% setdiff("(Intercept)")</span></span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>epsilon <span class="ot">=</span> <span class="dv">100</span></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>influential_points <span class="ot">=</span> seoul <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(residual))) <span class="sc">%&gt;%</span> </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(epsilon)</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a><span class="co">#influential_points %&gt;% View()</span></span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>influential.factors <span class="ot">=</span> <span class="fu">tibble</span>(</span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">Magnitude =</span> <span class="fu">c</span>(),</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">Factor =</span> <span class="fu">c</span>(),</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">Rank =</span> <span class="fu">c</span>()</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(influential_points)){</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  point <span class="ot">=</span> influential_points[i,lasso.bike.factors]</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  factors <span class="ot">=</span> seoul.bike.lasso<span class="sc">$</span>coefficients[<span class="dv">2</span><span class="sc">:</span><span class="fu">length</span>(seoul.bike.lasso<span class="sc">$</span>coefficients)]<span class="sc">*</span><span class="fu">t</span>(point)</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  factors <span class="sc">%&gt;%</span> <span class="fu">as.data.frame</span>() <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(<span class="fu">abs</span>(V1))) <span class="sc">%&gt;%</span></span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">setNames</span>(<span class="st">"Magnitude"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"Factor"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>      <span class="at">Rank =</span> <span class="fu">length</span>(lasso.bike.factors)<span class="sc">:</span><span class="dv">1</span></span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>    ) <span class="ot">-&gt;</span> factors</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a>  influential.factors <span class="ot">=</span> influential.factors <span class="sc">%&gt;%</span> <span class="fu">rbind</span>(factors)</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>influential.factors <span class="sc">%&gt;%</span> <span class="fu">mutate</span>(</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a>  <span class="at">AbsoluteMagnitude =</span> <span class="fu">abs</span>(Magnitude)</span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>) <span class="sc">%&gt;%</span> <span class="fu">group_by</span>(Factor) <span class="sc">%&gt;%</span></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_magnitude =</span> <span class="fu">mean</span>(AbsoluteMagnitude),</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">avg_rank =</span> <span class="fu">mean</span>(Rank)</span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="fu">desc</span>(avg_rank)) <span class="ot">-&gt;</span> influential.factors</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>top.influential.factors <span class="ot">=</span> influential.factors <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">6</span>)</span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(factor <span class="cf">in</span> top.influential.factors<span class="sc">$</span>Factor){</span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">hist</span>(influential_points[factor] <span class="sc">%&gt;%</span> <span class="fu">unlist</span>(), <span class="at">main=</span>factor)</span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-3.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-4.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-5.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-6.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Humidity, <span class="at">y=</span>RentedBikeCount))<span class="sc">+</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>, <span class="at">se=</span>F)<span class="sc">+</span></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-7.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">filter</span>(Seasons<span class="sc">==</span><span class="st">"Autumn"</span>) <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Humidity))<span class="sc">+</span></span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_bar</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-8.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>Visibility, <span class="at">y=</span>RentedBikeCount))<span class="sc">+</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>, <span class="at">se=</span>F)<span class="sc">+</span></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-9.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>WindSpeed, <span class="at">y=</span>RentedBikeCount))<span class="sc">+</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method=</span><span class="st">"lm"</span>, <span class="at">se=</span>F)<span class="sc">+</span></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span>Seasons)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-10.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>t <span class="ot">=</span> seoul <span class="sc">%&gt;%</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">Humidity =</span> Humidity <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">Visibility =</span> Visibility <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">WindSpeed =</span> WindSpeed <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="fu">invTranPlot</span>(RentedBikeCount <span class="sc">~</span> WindSpeed, <span class="at">data=</span>t, <span class="at">lambda =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="sc">-</span><span class="fl">0.5</span>, <span class="dv">0</span>, <span class="fl">0.5</span>, <span class="dv">1</span>), <span class="at">optimal=</span>T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-17-11.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>     lambda      RSS
+1 -1.121638 11062.20
+2 -1.000000 11062.52
+3 -0.500000 11070.66
+4  0.000000 11088.84
+5  0.500000 11114.46
+6  1.000000 11143.90</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>seoul <span class="sc">%&gt;%</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>()<span class="sc">+</span></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span><span class="fu">exp</span>(RentedBikeCount)<span class="sc">-</span><span class="dv">1</span>, <span class="at">color=</span><span class="st">"Actual"</span>), <span class="at">alpha=</span><span class="dv">1</span>)<span class="sc">+</span></span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x=</span>Time, <span class="at">y=</span><span class="fu">exp</span>(PredictedRentedBikeCount)<span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">color=</span><span class="st">"Predicted"</span>), <span class="at">alpha=</span><span class="fl">0.3</span>)<span class="sc">+</span></span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_grid</span>(<span class="sc">~</span><span class="fu">factor</span>(seoul<span class="sc">$</span>Seasons, <span class="at">levels=</span><span class="fu">c</span>(<span class="st">"Winter"</span>, <span class="st">"Spring"</span>, <span class="st">"Summer"</span>, <span class="st">"Autumn"</span>)), <span class="at">scales=</span><span class="st">"free_x"</span>)<span class="sc">+</span></span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title=</span><span class="st">"Predicted Bike Demand in Seoul Over Time"</span>,</span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">color=</span><span class="cn">NULL</span>)<span class="sc">+</span></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Time"</span>)<span class="sc">+</span></span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Rented Bike Count"</span>)<span class="sc">+</span></span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">0</span>, <span class="at">vjust =</span> <span class="dv">0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="final_project_template_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="contributions" class="level1">
+<h1>4 Contributions</h1>
+<p>For each member of the group, write a short paragraph describing their contribution to this project and the report. It is up to you to decide how to divide up the work, so long as everyone is contributing approximately equally.</p>
+<section id="appendix" class="level2">
+<h2 class="anchored" data-anchor-id="appendix">APPENDIX</h2>
+<p>If there are any analyses, such as exploratory plots/summaries or work you did to determine appropriate transformations, or any relevant material that does not belong in one of the sections above, these can go in the Appendix. If you don’t have any material like this, you can remove this section.</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

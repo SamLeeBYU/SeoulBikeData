@@ -39,15 +39,14 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
   mutate(
     Date = dmy(Date),
     Time = ymd_h(paste(Date, Hour)),
-    IsAutumn = as.numeric(Seasons == "Autumn"),
-    IsSummer = as.numeric(Seasons == "Summer"),
-    IsWinter = as.numeric(Seasons == "Winter"),
-    IsSpring = as.numeric(Seasons == "Spring"),
-    IsHoliday = as.numeric(Holiday == "Holiday"),
-    IsFunctioningDay = as.numeric(FunctioningDay == "Yes"),
-    Hour09 = Hour %in% 0:9,
-    Hour1015 = Hour %in% 10:15,
-    Hour1624 = Hour %in% 16:24,
+    IsAutumn = 1*as.numeric(Seasons == "Autumn"),
+    IsSummer = 1*as.numeric(Seasons == "Summer"),
+    IsWinter = 1*as.numeric(Seasons == "Winter"),
+    IsSpring = 1*as.numeric(Seasons == "Spring"),
+    IsHoliday = 1*as.numeric(Holiday == "Holiday"),
+    Hour09 = 1*(Hour %in% 0:9),
+    Hour1015 = 1*(Hour %in% 10:15),
+    Hour1624 = 1*(Hour %in% 16:24),
     RentedBikeCount = log(RentedBikeCount+1)
   ) %>% arrange(Time)
 ```
@@ -74,6 +73,28 @@ Briefly and clearly state the two main questions that you will investigate throu
 
 For each question of interest listed in Section 2, describe what regression models, techniques, and tools you will use to fully answer it. These should include any plots you will use for exploratory analysis or diagnostic checks, as well as methods of inference you will use.
 
+In order to estimate the short-run fluctuations in temperature we used a first-differences regression model. We hypothesized that since there are seasonal effects that are unobservable in our data set the error term, $\epsilon$ is composed of a season-specific error term, $\alpha_{s}$ and other random effects that also vary by the time period ($t$). Hence, $\epsilon_{st} = \alpha_{s} + \eta_{st}$. Let $s$ denote the season and $t$ denote time. For our data set-specific purposes, we will seek to understand how $\text{Temperature}_{st}$ changes with respect to each season and hour ($t$).
+
+Hence, for our simple multivariate regression model, if
+
+$\text{Temperature}_{st} = \beta_0 + \beta_1\text{Humidity}_{st} + \beta_2\text{DewPointTemp}_{st} + \beta_3\text{WindSpeed}_{st} + \beta_4\text{SolarRadiation}_{st} + \beta_5\text{Rainfall}_{st} + \beta_6\text{Snowfall}_{st} + \beta_7I(0 \leq \text{Hour}_t < 10) + \beta_8I(10 \leq \text{Hour}_t < 16) + \alpha_{s} + \eta_{st}$
+
+Then,
+
+$\text{Temperature}_{st-1} = \beta_0 + \beta_1\text{Humidity}_{st-1} + \beta_2\text{DewPointTemp}_{st-1} + \beta_3\text{WindSpeed}_{st-1} + \beta_4\text{SolarRadiation}_{st-1} + \beta_5\text{Rainfall}_{st-1} + \beta_6\text{Snowfall}_{st-1} + \beta_7I(0 \leq \text{Hour}_{t-1} < 10) + \beta_8I(10 \leq \text{Hour}_{t-1} < 16) + \alpha_{s} + \eta_{st-1}$
+
+Thus, we wish to estimate,
+
+$\Delta\text{Temperature}_{st} = \beta_1\Delta\text{Humidity}_{st} + \beta_2\Delta\text{DewPointTemp}_{st} + \beta_3\Delta\text{WindSpeed}_{st} + \beta_4\Delta\text{SolarRadiation}_{st} + \beta_5\Delta\text{Rainfall}_{st} + \beta_6\Delta\text{Snowfall}_{st} + \beta_7\Delta I(0 \leq \text{Hour}_t < 10) + \beta_8 \Delta I(10 \leq \text{Hour}_t < 16) + \Delta\eta_{st}$
+
+This eliminates the $t-1$ temperature dependency (and all other lagged dependencies for $t-1$ in $X$) and isolates the short-run change in temperature, which is what we seek to estimate.
+
+In order to estimate the hourly demand for bike sharing in Seoul. Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. However, exploratory data analysis has shown that current bike demand is not strongly dependent on the bike demand from $t-1$. Instead of using a first-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates.
+
+Hence, our basic fixed effects multivariate model for measuring the demand for rented bikes in Seoul will be interpreted as,
+
+$ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t < 20) + ... + \beta9I(90 \leq Humidity_t < 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}\sqrt{\text{Visibility}_{st}} + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_{st}$
+
 # 2 Analyses, Results, and Interpretation
 
 Conduct the analysis in a logical fashion, including necessary code (and not any superfluous code) and its output. Give simple interpretations of your findings related to the questions of interest.
@@ -88,23 +109,9 @@ season.dummies = setdiff(c("IsWinter", "IsSpring", "IsSummer", "IsAutumn"), seas
 time.base = "Hour1624"
 time.dummies = setdiff(c("Hour09", "Hour1015"), time.base)
 
-time.bike = c()
-for(h in unique(seoul$Hour)){
-  factor = str_c("Hour", h)
-  seoul[factor] = as.numeric(seoul$Hour == h)
-  time.bike = c(time.bike, factor)
-}
-time.bike.base = "Hour0"
-time.bike = setdiff(time.bike, time.bike.base)
-
 seoul.factors = c("Temperature", "Humidity", "DewPointTemp",
                   "WindSpeed", "Visibility", "SolarRadiation", "Rainfall",
                   "Snowfall", time.dummies)
-
-bike.dummies = c("IsHoliday", "IsFunctioningDay")
-seoul.bike.factors = c("RentedBikeCount", "Humidity", "Temperature",
-                       "WindSpeed", "Visibility", "DewPointTemp", "SolarRadiation",
-                       "Rainfall", "Snowfall", bike.dummies, time.bike, season.dummies)
 
 seoul.change = c()
 
@@ -119,10 +126,7 @@ for(factor in seoul.factors){
 }
 
 seoul.interaction = c()
-seoul.bike.interaction = c()
-
 seoul.base = c(time.base)
-seoul.bike.base = c(time.bike.base)
 
 #All 2d Interaction Effects
 continuous_interactions = combn(setdiff(seoul.change, 
@@ -140,16 +144,6 @@ for(i in 1:ncol(continuous_interactions)){
   }
 }
 
-continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
-                                        c(time.bike, season.dummies,
-                                          "RentedBikeCount")), 2)
-for(i in 1:ncol(continuous_interactions_bike)){
-  factor = paste(continuous_interactions_bike[,i], collapse = "X")
-  seoul.bike.interaction = c(seoul.bike.interaction, factor)
-  seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
-                  seoul[continuous_interactions_bike[2,i]]
-}
-
 #Time Interaction Effects
 for(factor in setdiff(seoul.change, 
                       c(str_c(time.dummies, "Change"),
@@ -164,6 +158,53 @@ for(factor in setdiff(seoul.change,
                                                       seoul.subset[time]
     }
   }
+}
+
+###### Rented Bike Count Model
+
+time.bike = c()
+for(h in unique(seoul$Hour)){
+  factor = str_c("Hour", h)
+  seoul[factor] = as.numeric(seoul$Hour == h)
+  time.bike = c(time.bike, factor)
+}
+time.bike.base = "Hour0"
+time.bike = setdiff(time.bike, time.bike.base)
+
+a = 1 #1 is excluded for base dummy
+time.humidities = str_c("Humidity",setdiff(1:10, a))
+for(h in 1:length(time.humidities)){
+  h.min = (h-1+a)*10
+  h.max = (h+a)*10
+  seoul[time.humidities[h]] = 1*(seoul$Humidity >= h.min &
+                                 seoul$Humidity < h.max)
+}
+
+bike.dummies = c("IsHoliday")
+seoul.bike.factors = c("RentedBikeCount", time.humidities, "Temperature",
+                       "WindSpeed", "Visibility", "DewPointTemp",
+                       "SolarRadiation", "ExtremeWind",
+                       "Rainfall", "Snowfall", bike.dummies, time.bike,
+                       season.dummies)
+
+seoul$ExtremeWind = 1*(seoul$WindSpeed > quantile(seoul$WindSpeed, 0.95))
+
+#Transform Visibility
+seoul$Visibility = -sqrt(seoul$Visibility)
+
+seoul.bike.interaction = c()
+seoul.bike.base = c(time.bike.base)
+
+
+continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
+                                        c(time.bike, season.dummies,
+                                          time.humidities,
+                                          "RentedBikeCount")), 2)
+for(i in 1:ncol(continuous_interactions_bike)){
+  factor = paste(continuous_interactions_bike[,i], collapse = "X")
+  seoul.bike.interaction = c(seoul.bike.interaction, factor)
+  seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
+                  seoul[continuous_interactions_bike[2,i]]
 }
 
 for(factor in setdiff(seoul.bike.factors,
@@ -185,6 +226,18 @@ for(factor in setdiff(seoul.bike.factors,
   }
 }
 
+#Humidity and Other Weather Effects
+for(factor in setdiff(seoul.bike.factors,
+                        c(time.bike, season.dummies,
+                                          time.humidities,
+                                          "RentedBikeCount"))){
+  for(humidity in time.humidities){
+    factor.interaction = str_c(factor, "X", humidity)
+    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
+    seoul[factor.interaction] = seoul[factor]*seoul[humidity]
+  }
+}
+
 seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
 
@@ -200,6 +253,12 @@ threshold = 0
 seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
   geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip))+
   facet_grid(~Seasons)
+
+seoul %>% ggplot()+
+  geom_point(aes(x=Hour, y=RentedBikeCount, color=FunctioningDay))+
+  facet_grid(~Seasons)
+seoul %>% 
+  filter(FunctioningDay == "Yes") -> seoul
 
 seoul.temp %>% ggplot()+
   geom_boxplot((aes(y=TemperatureChange, x=Seasons)))
@@ -310,7 +369,7 @@ singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiatio
                   "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
                   "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
                   "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
-                  "SnowfallXIsAutumn", "IsFunctioningDayXIsWinter", "IsFunctioningDayXIsSummer")
+                  "SnowfallXIsAutumn")
 model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
                              c(seoul.bike.base, "RentedBikeCount", singularities))
 
@@ -330,16 +389,16 @@ seoul.bike.lasso = lm(RentedBikeCount ~ .,
 
 print(summary(seoul.bike.lasso))
 
-seoul.bike.base.model = lm(RentedBikeCount ~ 1, seoul[c("RentedBikeCount", model.bike.factors)])
-seoul.bike.full.model = lm(RentedBikeCount ~ ., seoul[c("RentedBikeCount", model.bike.factors)])
-
-seoul.bike.step = step(seoul.bike.base.model,
-                       direction = "both",
-                       k = log(nrow(seoul)),
-                       scope = list(lower=seoul.bike.base.model,
-                                    upper=seoul.bike.full.model))
-
-print(summary(seoul.bike.step))
+# seoul.bike.base.model = lm(RentedBikeCount ~ 1, seoul[c("RentedBikeCount", model.bike.factors)])
+# seoul.bike.full.model = lm(RentedBikeCount ~ ., seoul[c("RentedBikeCount", model.bike.factors)])
+# 
+# seoul.bike.step = step(seoul.bike.base.model,
+#                        direction = "both",
+#                        k = log(nrow(seoul)),
+#                        scope = list(lower=seoul.bike.base.model,
+#                                     upper=seoul.bike.full.model))
+# 
+# print(summary(seoul.bike.step))
 
 # seoul.base.models = create_season_models(model.factors,
 #                                          "TemperatureChange",
@@ -410,55 +469,55 @@ print(summary(seoul.bike.step))
 ```
 
 ```{r}
-epsilon = 0.5
-t = seoul %>% filter(abs(RainfallChange) >= epsilon) %>% mutate(
-  RainfallChange = RainfallChange + abs(min(RainfallChange)) + 1,
-  TemperatureChange = TemperatureChange #+ abs(min(TemperatureChange)) + 1
-)
-
-t %>% ggplot()+
-  geom_point(aes(x=RainfallChange, y=TemperatureChange))
-
-# t$Rainfall = t$Rainfall^1.5
-invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-bc = boxCox(t$TemperatureChange ~ t$Rainfall)
-lambda = bc$x[which(bc$y == max(bc$y))]
-lambda
-t$TemperatureChange = t$TemperatureChange^2
-
-invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-
-t %>% ggplot()+
-  geom_point(aes(x=RainfallChange, y=TemperatureChange))
-
-invTranPlot(TemperatureChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-
-t = seoul %>% mutate(
-    SnowfallChange = SnowfallChange + abs(min(SnowfallChange)) + 1,
-    TemperatureChange = TemperatureChange + abs(min(TemperatureChange)) + 1
-)
-invTranPlot(TemperatureChange ~ SnowfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
-
-seoul %>% ggplot()+
-  geom_point(aes(x=SnowfallChange, y=TemperatureChange))
-
-snowfall.lm = lm(TemperatureChange ~ Snowfall, data=t)
-summary(snowfall.lm)
-
-seoul %>% mutate(
-  Snowfall = ifelse(
-    Snowfall == 0, 0,
-    predict(snowfall.lm, seoul)
-  )
-)
-
-seoul %>% mutate(
-  IsRainDifference = abs(RainfallChange) >= epsilon,
-  IsSnowing = ifelse(
-    Snowfall == 0, 0,
-    predict(snowfall.lm, seoul)
-  )
-)
+# epsilon = 0.5
+# t = seoul %>% filter(abs(RainfallChange) >= epsilon) %>% mutate(
+#   RainfallChange = RainfallChange + abs(min(RainfallChange)) + 1,
+#   TemperatureChange = TemperatureChange #+ abs(min(TemperatureChange)) + 1
+# )
+# 
+# t %>% ggplot()+
+#   geom_point(aes(x=RainfallChange, y=TemperatureChange))
+# 
+# # t$Rainfall = t$Rainfall^1.5
+# invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+# bc = boxCox(t$TemperatureChange ~ t$Rainfall)
+# lambda = bc$x[which(bc$y == max(bc$y))]
+# lambda
+# t$TemperatureChange = t$TemperatureChange^2
+# 
+# invTranPlot(TemperatureChange ~ RainfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+# 
+# t %>% ggplot()+
+#   geom_point(aes(x=RainfallChange, y=TemperatureChange))
+# 
+# invTranPlot(TemperatureChange ~ Rainfall, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+# 
+# t = seoul %>% mutate(
+#     SnowfallChange = SnowfallChange + abs(min(SnowfallChange)) + 1,
+#     TemperatureChange = TemperatureChange + abs(min(TemperatureChange)) + 1
+# )
+# invTranPlot(TemperatureChange ~ SnowfallChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+# 
+# seoul %>% ggplot()+
+#   geom_point(aes(x=SnowfallChange, y=TemperatureChange))
+# 
+# snowfall.lm = lm(TemperatureChange ~ Snowfall, data=t)
+# summary(snowfall.lm)
+# 
+# seoul %>% mutate(
+#   Snowfall = ifelse(
+#     Snowfall == 0, 0,
+#     predict(snowfall.lm, seoul)
+#   )
+# )
+# 
+# seoul %>% mutate(
+#   IsRainDifference = abs(RainfallChange) >= epsilon,
+#   IsSnowing = ifelse(
+#     Snowfall == 0, 0,
+#     predict(snowfall.lm, seoul)
+#   )
+# )
 ```
 
 ```{r}
@@ -689,13 +748,85 @@ seoul.temp %>%
 ```
 
 ```{r message=F, warning=F}
-seoul$PredictedRentedBikeCount = predict(seoul.bike.step, seoul)
+seoul$PredictedRentedBikeCount = predict(seoul.bike.lasso, seoul)
 seoul$residual = seoul$PredictedRentedBikeCount - seoul$RentedBikeCount
 
+#step.factors = seoul.bike.step$coefficients %>% names() %>% setdiff("(Intercept)")
+
+epsilon = 100
+influential_points = seoul %>% arrange(desc(abs(residual))) %>% 
+  head(epsilon)
+
+#influential_points %>% View()
+
+influential.factors = tibble(
+  Magnitude = c(),
+  Factor = c(),
+  Rank = c()
+)
+
+for(i in 1:nrow(influential_points)){
+  point = influential_points[i,lasso.bike.factors]
+  
+  factors = seoul.bike.lasso$coefficients[2:length(seoul.bike.lasso$coefficients)]*t(point)
+  
+  factors %>% as.data.frame() %>% arrange(desc(abs(V1))) %>%
+    setNames("Magnitude") %>%
+    rownames_to_column(var = "Factor") %>%
+    mutate(
+      Rank = length(lasso.bike.factors):1
+    ) -> factors
+  
+  influential.factors = influential.factors %>% rbind(factors)
+}
+
+influential.factors %>% mutate(
+  AbsoluteMagnitude = abs(Magnitude)
+) %>% group_by(Factor) %>%
+  summarize(
+    avg_magnitude = mean(AbsoluteMagnitude),
+    avg_rank = mean(Rank)
+  ) %>% arrange(desc(avg_rank)) -> influential.factors
+
+top.influential.factors = influential.factors %>% head(6)
+
+for(factor in top.influential.factors$Factor){
+  hist(influential_points[factor] %>% unlist(), main=factor)
+}
+
+seoul %>% ggplot(aes(x=Humidity, y=RentedBikeCount))+
+  geom_point()+
+  geom_smooth(method="lm", se=F)+
+  facet_grid(~Seasons)
+
+seoul %>% filter(Seasons=="Autumn") %>% ggplot(aes(x=Humidity))+
+  geom_bar()
+
+seoul %>% ggplot(aes(x=Visibility, y=RentedBikeCount))+
+  geom_point()+
+  geom_smooth(method="lm", se=F)+
+  facet_grid(~Seasons)
+
+seoul %>% ggplot(aes(x=WindSpeed, y=RentedBikeCount))+
+  geom_point()+
+  geom_smooth(method="lm", se=F)+
+  facet_grid(~Seasons)
+
+t = seoul %>%
+  mutate(
+    Humidity = Humidity + 1,
+    Visibility = Visibility + 1,
+    WindSpeed = WindSpeed + 1,
+  )
+
+invTranPlot(RentedBikeCount ~ WindSpeed, data=t, lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+```
+
+```{r}
 seoul %>% 
   ggplot()+
-  geom_point(aes(x=Time, y=exp(RentedBikeCount)-1, color="Actual"), alpha=1)+
-  geom_point(aes(x=Time, y=exp(PredictedRentedBikeCount)-1,
+  geom_line(aes(x=Time, y=exp(RentedBikeCount)-1, color="Actual"), alpha=1)+
+  geom_line(aes(x=Time, y=exp(PredictedRentedBikeCount)-1,
                 color="Predicted"), alpha=0.3)+
   facet_grid(~factor(seoul$Seasons, levels=c("Winter", "Spring", "Summer", "Autumn")), scales="free_x")+
   labs(title="Predicted Bike Demand in Seoul Over Time",
