@@ -33,6 +33,11 @@ library(alr4)
 library(glmnet)
 library(broom)
 library(robustbase)
+library(gridExtra)
+library(httr)
+library(jsonlite)
+library(tibble)
+
 
 set.seed(12022023)
 
@@ -52,7 +57,7 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
     Hour09 = 1*(Hour %in% 0:9),
     Hour1018 = 1*(Hour %in% 10:18),
     Hour1924 = 1*(Hour %in% 19:24),
-    RentedBikeCount = log(RentedBikeCount+1)
+    TransformedRentedBikeCount = log(RentedBikeCount+1)
   ) %>% arrange(Time)
 ```
 
@@ -101,51 +106,54 @@ seoul.factors = c("Temperature", "Humidity", "DewPointTemp",
                   "Snowfall", time.dummies)
 
 seoul.change = c()
-
-for(factor in seoul.factors){
-  change_factor = str_c(factor, "Change")
-  seoul.change = c(seoul.change, change_factor)
-  seoul[change_factor] = NA_real_
-  for(s in seasons){
-    seoul.subset = seoul %>% filter(Seasons == s)
-    seoul[seoul$Seasons == s, change_factor] = seoul.subset[factor]-lag(seoul.subset[factor], n=difference)
-  }
-}
-
 seoul.interaction = c()
 seoul.base = c(time.base)
 
-#All 2d Interaction Effects
-continuous_interactions = combn(setdiff(seoul.change, 
-                                        c(str_c(time.dummies, "Change"),
-                                          str_c(season.dummies, "Change"),
-                                          "TemperatureChange")), 2)
-for(i in 1:ncol(continuous_interactions)){
-  factor = paste(continuous_interactions[,i], collapse = "X")
-  seoul.interaction = c(seoul.interaction, factor)
-  seoul[factor] = NA_real_
-  for(s in seasons){
-    seoul.subset = seoul %>% filter(Seasons == s)
-    seoul[seoul$Seasons == s, factor] = seoul.subset[continuous_interactions[1,i]]*
-                                        seoul.subset[continuous_interactions[2,i]]
-  }
-}
-
-#Time Interaction Effects
-for(factor in setdiff(seoul.change, 
-                      c(str_c(time.dummies, "Change"),
-                        "TemperatureChange"))){
-  for(time in str_c(time.dummies, "Change")){
-    factor.interaction = str_c(factor, "X", time)
-    seoul.interaction = c(seoul.interaction, factor.interaction)
-    seoul[factor.interaction] = NA_real_
+format_change_table = function(t=seoul, f=seoul.factors){
+  for(factor in f){
+    change_factor = str_c(factor, "Change")
+    seoul.change <<- c(seoul.change, change_factor)
+    t[change_factor] = NA_real_
     for(s in seasons){
-      seoul.subset = seoul %>% filter(Seasons == s)
-      seoul[seoul$Seasons == s, factor.interaction] = seoul.subset[factor]*
-                                                      seoul.subset[time]
+      seoul.subset = t %>% filter(Seasons == s)
+      t[t$Seasons == s, change_factor] = seoul.subset[factor]-lag(seoul.subset[factor], n=difference)
     }
   }
+  
+  #All 2d Interaction Effects
+  continuous_interactions = combn(setdiff(seoul.change, 
+                                          c(str_c(time.dummies, "Change"),
+                                            str_c(season.dummies, "Change"),
+                                            "TemperatureChange")), 2)
+  for(i in 1:ncol(continuous_interactions)){
+    factor = paste(continuous_interactions[,i], collapse = "X")
+    seoul.interaction <<- c(seoul.interaction, factor)
+    t[factor] = NA_real_
+    for(s in seasons){
+      seoul.subset = t %>% filter(Seasons == s)
+      t[t$Seasons == s, factor] = seoul.subset[continuous_interactions[1,i]]*
+                                          seoul.subset[continuous_interactions[2,i]]
+    }
+  }
+  
+  #Time Interaction Effects
+  for(factor in setdiff(seoul.change, 
+                        c(str_c(time.dummies, "Change"),
+                          "TemperatureChange"))){
+    for(time in str_c(time.dummies, "Change")){
+      factor.interaction = str_c(factor, "X", time)
+      seoul.interaction <<- c(seoul.interaction, factor.interaction)
+      seoul[factor.interaction] = NA_real_
+      for(s in seasons){
+        seoul.subset = t %>% filter(Seasons == s)
+        t[t$Seasons == s, factor.interaction] = seoul.subset[factor]*
+                                                        seoul.subset[time]
+      }
+    }
+  }
+  return(t)
 }
+seoul = format_change_table(seoul)
 
 ###### Rented Bike Count Model
 
@@ -158,63 +166,96 @@ for(h in 1:length(time.humidities)){
                                  seoul$Humidity < h.max)
 }
 
+bike.deltas = c()
+calculate_deltas = function(v=seoul$RentedBikeCount){
+  bike.deltas <<- c()
+
+  deltas.choice = 1:9
+  for(delta in deltas.choice){
+    factor = str_c("RentedBikeCount_Lag", delta)
+    seoul[factor] = lag(v, n=delta)
+    bike.deltas <<- c(bike.deltas, factor)
+  }
+  
+  seoul <<- seoul
+}
+calculate_deltas()
+
 bike.dummies = c("IsHoliday")
-seoul.bike.factors = c("RentedBikeCount", time.humidities, "Temperature",
+seoul.bike.factors = c("RentedBikeCount", "Humidity", "Temperature",
                        "WindSpeed", "Visibility", "DewPointTemp",
                        "SolarRadiation", "ExtremeWind",
                        "Rainfall", "Snowfall", bike.dummies, time.bike,
-                       season.dummies)
+                       season.dummies, bike.deltas)
 
-seoul$ExtremeWind = 1*(seoul$WindSpeed > quantile(seoul$WindSpeed, 0.95))
+seoul %>% group_by(Seasons) %>%
+  mutate(
+    ExtremeWind = 1*(WindSpeed >= quantile(WindSpeed, 0.9)),
+    WindSpeedTransformed = ifelse(
+      WindSpeed < quantile(WindSpeed, 0.9), WindSpeed, 0
+    )
+  ) %>% ungroup() -> seoul
 
 #Transform Visibility
-seoul$Visibility = -sqrt(seoul$Visibility)
+seoul$VisibilityTransformed = seoul$Visibility^(-1/2)
+
+seoul.bike.transformed = c(time.humidities, "ExtremeWind", "WindSpeedTransformed",
+                           "VisibilityTransformed")
+
+# seoul.bike.factors = c(seoul.bike.factors, seoul.bike.transformed)
 
 seoul.bike.interaction = c()
 seoul.bike.base = c(time.bike.base)
 
-
-continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
+create_interaction_terms = function(){
+  
+  seoul.bike.interaction <<- c()
+  
+ continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
                                         c(time.bike, season.dummies,
                                           time.humidities,
                                           "RentedBikeCount")), 2)
-for(i in 1:ncol(continuous_interactions_bike)){
-  factor = paste(continuous_interactions_bike[,i], collapse = "X")
-  seoul.bike.interaction = c(seoul.bike.interaction, factor)
-  seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
-                  seoul[continuous_interactions_bike[2,i]]
-}
-
-for(factor in setdiff(seoul.bike.factors,
-                        c(time.bike, season.dummies, "RentedBikeCount"))){
-  for(time in time.bike){
-    factor.interaction = str_c(factor, "X", time)
-    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
-    seoul[factor.interaction] = seoul[factor]*seoul[time]
+  for(i in 1:ncol(continuous_interactions_bike)){
+    factor = paste(continuous_interactions_bike[,i], collapse = "X")
+    seoul.bike.interaction <<- c(seoul.bike.interaction, factor)
+    seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
+                    seoul[continuous_interactions_bike[2,i]]
   }
-}
-
-#Seasonal Interactions
-for(factor in setdiff(seoul.bike.factors,
-                        c(season.dummies, "RentedBikeCount"))){
-  for(s in season.dummies){
-    factor.interaction = str_c(factor, "X", s)
-    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
-    seoul[factor.interaction] = seoul[factor]*seoul[s]
+  
+  for(factor in setdiff(seoul.bike.factors,
+                          c(time.bike, season.dummies, "RentedBikeCount"))){
+    for(time in time.bike){
+      factor.interaction = str_c(factor, "X", time)
+      seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
+      seoul[factor.interaction] = seoul[factor]*seoul[time]
+    }
   }
-}
-
-#Humidity and Other Weather Effects
-for(factor in setdiff(seoul.bike.factors,
-                        c(time.bike, season.dummies,
-                                          time.humidities,
-                                          "RentedBikeCount"))){
-  for(humidity in time.humidities){
-    factor.interaction = str_c(factor, "X", humidity)
-    seoul.bike.interaction = c(seoul.bike.interaction, factor.interaction)
-    seoul[factor.interaction] = seoul[factor]*seoul[humidity]
+  
+  #Seasonal Interactions
+  for(factor in setdiff(seoul.bike.factors,
+                          c(season.dummies, "RentedBikeCount"))){
+    for(s in season.dummies){
+      factor.interaction = str_c(factor, "X", s)
+      seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
+      seoul[factor.interaction] = seoul[factor]*seoul[s]
+    }
   }
+  
+  #Humidity and Other Weather Effects
+  for(factor in setdiff(seoul.bike.factors,
+                          c(time.bike, season.dummies,
+                                            time.humidities,
+                                            "RentedBikeCount"))){
+    for(humidity in time.humidities){
+      factor.interaction = str_c(factor, "X", humidity)
+      seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
+      seoul[factor.interaction] = seoul[factor]*seoul[humidity]
+    }
+  } 
+ 
+ seoul <<- seoul
 }
+create_interaction_terms()
 
 seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
@@ -307,7 +348,7 @@ elastic_cv <- cv.glmnet(x = seoul.x,
 
 d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
 elastic.factors = c(model.factors[which(d != 0)])
-elastic.factors = c(elastic.factors, setdiff(str_c(time.bike, "Change"), elastic.factors))
+elastic.factors = c(elastic.factors, setdiff(c(str_c(time.bike, "Change"), "RainfallChange"), elastic.factors))
 seoul.elastic = lm(TemperatureChange ~ 0 + .,
                                        seoul.temp[c("TemperatureChange",
                                        elastic.factors)])
@@ -332,74 +373,140 @@ Additionally, diagnostics ([A.2.1](#a21)) show that there no undully outliers, a
 
 Thus, using our elastic regression results, we will modify Model (1) to include the following interaction terms. We made sure to include the lower-order regression coefficients for the coefficients that elastic net regression left out when elastic net included interaction terms involving a lower-order term. We are interested in estimating the most assailant factors ([A.5](#a5)). See [A.6](#a6) for the full model.
 
-(2) $\Delta\text{Temperature}_{st} = ... + \beta_5\Delta\text{SolarRadiation}_{st} + ... + \beta_8\Delta I(\text{Hour}_{t} = 1) + ... + \beta_{30}\Delta I(\text{Hour}_{t} = 23) + ... + \beta_{32}\Delta\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \beta_{39}\Delta\text{SolarRadiation}_{st}\text{Rainfall}_{st} + ... + \sum_{n=1}^{23}{\beta_{131+n}\Delta\text{SolarRadiation}_{st}\Delta I(\text{Hour}_t=n)} + ... + \Delta\eta_{st}$
+(2) $\Delta\text{Temperature}_{st} = ... + \beta_5\Delta\text{SolarRadiation}_{st} + ... +  \beta_{32}\Delta\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \beta_{39}\Delta\text{SolarRadiation}_{st}\text{Rainfall}_{st} + ... + \sum_{n=1}^{23}{\beta_{131+n}\Delta\text{SolarRadiation}_{st}\Delta I(\text{Hour}_t=n)} + ... + \Delta\eta_{st}$
 
 $\Delta\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
 
 ---
 
-In order to estimate the hourly demand for bike sharing in Seoul. Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. However, exploratory data analysis has shown that current bike demand is not strongly dependent on the bike demand from $t-1$. Instead of using a first-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates. We will use Spring as our base season.
+Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. Instead of using a $k$th-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates. We will use Spring as our base season. However, exploratory data analysis has shown that current bike demand is strongly dependent on the bike demand from previous hours. Hence, in order to include seasonal dummy variables, we also need to include a set of lagged effects ($\delta_{p}$) conditional on Season on $\text{RentedBikeCount}_{st} \quad \forall s \in \text{Seasons}, s\neq\text{Spring}$ to adjust for the time dependency. (See [A.7](#a7) to see how we chose our set of lagged effects).
+
+```{r echo=F}
+threshold = 0.25
+seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
+  geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip), size=0.5)+
+  facet_grid(~Seasons)
+```
+
+Hence, we will first estimate the hourly demand for rented bikes in Seoul with the following model,
+
+(3) $\text{RentedBikeCount}_{st} = \beta_0 + \beta_1\text{Humidity}_{st} + \beta_{2}\text{Temperature}_{st} + \beta_{3}\text{WindSpeed}_{st} + \beta_{4}\text{Visibility}_{st} + \beta_{5}\text{DewPointTemp}_{st} + \beta_{6}\text{SolarRadiation}_{st} + \beta_{7}\text{Rainfall}_{st} + \beta_{8}\text{Snowfall}_{st} + \beta_{9}I(\text{Day}_t = Holiday) + \beta_{10}I(\text{Hour}_t = 1) + ... + \beta_{32}I(\text{Hour}_t = 23) + \beta_{33}I(\text{Season}_s = Winter) + \beta_{34}I(\text{Season}_s = Summer) + \beta_{35}I(\text{Season}_s = Autumn) + \delta_1\text{RentedBikeCount}_{st-1} + \delta_{23}\text{RentedBikeCount}_{st-23} + \sum_{p=1}^{9}\delta_p + \eta_{st}$
 
 ```{r}
-l = 1
-alpha = 0.05
-deltas = cov(seoul$RentedBikeCount[(l+1):length(seoul$RentedBikeCount)], 
-    lag(seoul$RentedBikeCount, n=l)[(l+1):length(seoul$RentedBikeCount)])/
-var(seoul$RentedBikeCount[(l+1):length(seoul$RentedBikeCount)])
-p.value = 0
+model.3.factors = c(seoul.bike.factors, 
+                                bike.deltas)%>% setdiff(c(
+                                time.humidities, seoul.bike.transformed))
 
-while(p.value < alpha){
-  l = l+1
-  
-  deltas = c(deltas, cov(seoul$RentedBikeCount[(l+1):length(seoul$RentedBikeCount)], 
-    lag(seoul$RentedBikeCount, n=l)[(l+1):length(seoul$RentedBikeCount)])/
-  var(seoul$RentedBikeCount[(l+1):length(seoul$RentedBikeCount)]))
-  
-  l.lm = lm(seoul$RentedBikeCount[(l+1):length(seoul$RentedBikeCount)] ~ 
-       lag(seoul$RentedBikeCount, n=l)[(l+1):length(seoul$RentedBikeCount)]) %>%
-    summary()
-  p.value = l.lm$coefficients[, "Pr(>|t|)"][2]
-}
-
-find_local_max = function(v){
-  if(v[2] <= v[1]){
-    maxes = v[1]
-  } else {
-    maxes = c()
-  }
-  
-  for(i in 1:length(v)){
-    if(i-1 >= 1 && i+1 <= length(v)){
-      if(v[i-1] <= v[i] && 
-         v[i+1] <= v[i]){
-        maxes = c(maxes, v[i])
-      }
-    }
-  }
-  
-  if(v[length(v)] >= v[(length(v)-1)]){
-    maxes = c(maxes, v[length(v)])
-  }
-  
-  return(maxes)
-}
-
-local.max = find_local_max(deltas)
-deltas.max = which(deltas %in% local.max)
-
-ggplot(mapping=aes(x=1:l, y=deltas))+
-  geom_point()+
-  geom_line()+
-  xlab("Lags (Hours Ago)")+
-  ylab(expression(delta))+
-  scale_x_continuous(breaks=deltas.max)
+seoul.bike.lm = lm(RentedBikeCount ~ ., 
+                   data=seoul[model.3.factors])
+summary(seoul.bike.lm)
+autoplot(seoul.bike.lm)
+show_leverage(seoul.bike.lm)
 ```
+
+```{r}
+singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
+                  "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
+                  "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
+                  "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
+                  "SnowfallXIsAutumn")
+model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
+                             c(seoul.bike.base, "RentedBikeCount", singularities))
+
+seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
+seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+
+elastic_cv <- cv.glmnet(x = seoul.bike.x,
+                      y = seoul.bike.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
+elastic.bike.factors = model.bike.factors[which(d != 0)]
+seoul.bike.elastic = lm(RentedBikeCount ~ .,
+                                       seoul[c("RentedBikeCount",
+                                       elastic.bike.factors)])
+
+print(summary(seoul.bike.elastic))
+autoplot(seoul.bike.elastic)
+show_leverage(seoul.bike.elastic)
+```
+
 
 We transformed $\text{RentedBikeCount}_{st}$ with a $ln$ transformation. Upon further analysis, we also transformed $\text{Visibility}_{st}$ with a $f(x)=-\sqrt{x}$ transformation. We also noticed that different levels of $\text{Humidity}_{st}$ were affecting $\text{RentedBikeCount}_{st}$ in a non-linear fashion. Hence, we created 10 different levels for humidity as dummy variables, omitting the 0-10% level as the base level. We also noticed that extreme levels of $\text{WindSpeed}_{st}$ were also affecting $\text{RentedBikeCount}_{st}$. We created another variable, $I(\text{WindSpeed}_{st} > \phi(\text{WindSpeed}_s,0.95))$
 
 Hence, our basic fixed effects multivariate model for measuring the demand for rented bikes in Seoul will be interpreted as,
 
 $ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t < 20) + ... + \beta9I(90 \leq Humidity_t < 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}(-\sqrt{\text{Visibility}_{st}}) + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_{st}$
+
+## Forecast
+
+```{r echo=F, warning=F}
+api_url <- "https://api.open-meteo.com/v1/forecast?latitude=37.566&longitude=126.9784&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,visibility,wind_speed_10m,diffuse_radiation&wind_speed_unit=ms&past_days=7"
+
+response <- GET(api_url)
+fetch_time = ymd_h(paste(Sys.Date(), hour(now())))
+content <- content(response, "text", encoding = "UTF-8")
+
+data <- fromJSON(content)
+
+hourly_data <- data$hourly
+
+forecast <- as_tibble(hourly_data) %>% mutate(
+  time = as.POSIXct(time, format = "%Y-%m-%dT%H:%M"),
+  diffuse_radiation = diffuse_radiation/100,
+  visibility = visibility/100,
+  Hour = time %>% hour(),
+  f = time >= as.POSIXct(fetch_time, format = "%Y-%m-%dT%H:%M")
+) %>% setNames(c("Time", "Temperature", "Humidity", "DewPointTemp", "Rainfall", "Snowfall",
+               "Visibility", "WindSpeed", "SolarRadiation", "Hour", "Forecast"))
+
+forecast$Seasons = "Winter"
+
+time.forecast = c()
+for(h in unique(forecast$Hour)){
+  factor = str_c("Hour", h)
+  forecast[factor] = as.numeric(forecast$Hour == h)
+  time.forecast = c(time.forecast, factor)
+}
+time.forecast.base = "Hour0"
+time.forecast = setdiff(time.forecast, time.forecast.base)
+
+forecast.factors = c("Temperature", "Humidity", "DewPointTemp",
+                  "WindSpeed", "Visibility", "SolarRadiation", "Rainfall",
+                  "Snowfall", time.forecast)
+
+forecast = format_change_table(forecast)
+
+forecast$PredictedChange = predict(seoul.elastic, forecast)
+forecast$PredictedTemperature = forecast$PredictedChange+
+  lag(forecast$Temperature, n=difference)
+
+forecast[complete.cases(forecast[forecast.factors]),] -> forecast
+
+forecast %>% ggplot(aes(x=Time, y=TemperatureChange, color=Forecast))+
+  geom_line()+
+  geom_line(aes(y=PredictedChange), color="#14DD32", alpha=0.5)+
+  ylab(expression(Delta~Temperature))+
+  labs(
+    title="Current Weekly Forecast of Change in Temperature in Seoul",
+    subtitle = "Overlaid by Prediction"
+  )+
+  theme_minimal()
+
+
+forecast %>% ggplot(aes(x=Time, y=Temperature, color=Forecast))+
+  geom_line()+
+  geom_line(aes(y=PredictedTemperature), color="#14DD32", alpha=0.5)+
+  ylab("Temperature")+
+  labs(
+    title="Current Weekly Forecast of in Temperature in Seoul",
+    subtitle = "Overlaid by Prediction"
+  )+
+  theme_minimal()
+
+#write.csv(forecast, "forecast.csv")
+```
 
 ## APPENDIX
 
@@ -563,8 +670,11 @@ Most assailant factors in Model (2) (hour changes excluded)
 
 ```{r}
 elastic.coef = tibble(
+  Rank = 1:length(seoul.elastic$coefficients),
   Factor = names(seoul.elastic$coefficients),
-  Coefficient = seoul.elastic$coefficients
+  Coefficient = seoul.elastic$coefficients,
+  P.Value = summary(seoul.elastic)$coefficients[,"Pr(>|t|)"] %>% round(5) %>%
+    format(scientific=F)
 )
 
 elastic.coef %>% arrange(abs(Coefficient) %>% desc()) %>% 
@@ -595,3 +705,75 @@ $\beta_{131+n} = 0 \quad \forall n \in \{8,9,15,16,18,21,22\}$
 $\beta_{154+o} = 0 \quad \forall o \in \{1,...,8,11,12,13,15,16,17,18,19,23\}$
 
 $\beta_{177+p} = 0 \quad \forall p \in \{1,...,7,11,...,15,17,18,20,21,22,23\}$
+
+#### A.7 {#a7}
+
+Choosing the optimal set of lagged effects, $\delta_p \quad \forall p \in P$
+
+Similar to choosing $k$ in our $k$th-difference model such that $\Delta\text{Temperature}_{st}$ was no longer dependent on $\Delta\text{Temperature}_{st-k}$, we need to find the optimal set $P$ such that $\text{RentedBikeCount}_{st}$ is no longer dependent on $\text{RentedBikeCount}_{st-p} \quad \forall p \in P$. To do this, we need to find the maximum lags ($max(P)$) that makes it so there is no longer a significant marginal effect on $\text{RentedBikeCount}_{st}$.
+
+```{r}
+
+find_local_max = function(v){
+  if(v[2] <= v[1]){
+    maxes = v[1]
+  } else {
+    maxes = c()
+  }
+  
+  for(i in 1:length(v)){
+    if(i-1 >= 1 && i+1 <= length(v)){
+      if(v[i-1] <= v[i] && 
+         v[i+1] <= v[i]){
+        maxes = c(maxes, v[i])
+      }
+    }
+  }
+  
+  if(v[length(v)] >= v[(length(v)-1)]){
+    maxes = c(maxes, v[length(v)])
+  }
+  
+  return(maxes)
+}
+
+graphs = list()
+
+for(season in seoul$Seasons %>% unique()){
+  l = 1
+  alpha = 0.05
+  seoul.subset = seoul %>% filter(Seasons == season)
+  deltas = cov(seoul.subset$RentedBikeCount[(l+1):length(seoul.subset$RentedBikeCount)], 
+      lag(seoul.subset$RentedBikeCount, n=l)[(l+1):length(seoul.subset$RentedBikeCount)])/
+  var(seoul.subset$RentedBikeCount[(l+1):length(seoul.subset$RentedBikeCount)])
+  p.value = 0
+  
+  while(p.value < alpha){
+    l = l+1
+    
+    deltas = c(deltas, cov(seoul.subset$RentedBikeCount[(l+1):length(seoul.subset$RentedBikeCount)], 
+      lag(seoul.subset$RentedBikeCount, n=l)[(l+1):length(seoul.subset$RentedBikeCount)])/
+    var(seoul.subset$RentedBikeCount[(l+1):length(seoul.subset$RentedBikeCount)]))
+    
+    l.lm = lm(seoul.subset$RentedBikeCount[(l+1):length(seoul.subset$RentedBikeCount)] ~ 
+         lag(seoul.subset$RentedBikeCount, n=l)[(l+1):length(seoul.subset$RentedBikeCount)]) %>%
+      summary()
+    p.value = l.lm$coefficients[, "Pr(>|t|)"][2]
+  }
+  
+  local.max = find_local_max(deltas)
+  deltas.max = which(deltas %in% local.max)
+  
+  p = ggplot(mapping=aes(x=1:l, y=deltas))+
+    geom_point()+
+    geom_line()+
+    xlab("Lags (Hours Ago)")+
+    ylab(expression(delta[p]))+
+    scale_x_continuous(breaks=1:l)+
+    labs(title=str_c("Pth Lagged Effects on Rented Bike Count During ", season))
+  
+  print(p)
+}
+```
+
+Since Spring is our base season, we will include $p=9$ lagged effects for $\text{RentedBikeCount}_{st}$ in the base model, and since no other season has $p > 9$, we do not need any other lagged effects dependent on season.
