@@ -29,6 +29,8 @@ library(ggfortify)
 library(alr4)
 library(glmnet)
 library(robustbase)
+library(broom)
+
 set.seed(12022023)
 
 seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
@@ -61,13 +63,19 @@ In this section, you will describe the background information about the study th
 
 ## 1.1 Data Description
 
-[Seoul Bike Sharing Data](https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand)
+In this analysis we used data from UC Irvine's Machine Learning's Repository. We accessed [Seoul Bike Sharing Data](https://archive.ics.uci.edu/dataset/560/seoul+bike+sharing+demand), which contains 8,760 rows of hourly data pertaining to the corresponding amount of rented bikes (bike demand) in Seoul, Korea. It also contains corresponding data for the respective temperature (celcius), humidity (%), wind speed (m/s), visibility (10m), dew point temperature (celcius), solar radiation (MJ/$m^2$, rainfall precipitation (mm), snowfall precipitation (cm), seasons (Winter, Spring, Summer, Autumn), and an indicator determining whether the corresponding day is a holiday.
+
+We will use these variables along with a subset of interaction terms which will be determined by lasso regression to include in our models.
 
 Briefly state the source of your data and describe the relevant variables that **you will use** in your project. Include important details such as units for the different variables, and what the \`\`observational units" (rows in the data set) represent (e.g., individuals, countries, etc.)
 
 ## 1.2 Questions of Interest
 
 Briefly and clearly state the two main questions that you will investigate throughout the report. These questions should be stated in scientific, and not statistical language. For example, "Is the slope of log of per capita GDP significantly different from zero?" should instead by give as "Does the log of per capita GDP have an effect on the average life expectancy of females in a given country?"
+
+1.  Can we use factors in weather and time to determine the best predictors of short-run for fluctuations in temperature for the climate in Seoul, Korea? If there are predictive factors, which one has the largest influence? 
+
+2.  Can we determine which weather and time factors affect the bike sharing demand the most in Seoul, Korea?
 
 ## 1.3 Regression Methods
 
@@ -87,13 +95,21 @@ Thus, we wish to estimate,
 
 $\Delta\text{Temperature}_{st} = \beta_1\Delta\text{Humidity}_{st} + \beta_2\Delta\text{DewPointTemp}_{st} + \beta_3\Delta\text{WindSpeed}_{st} + \beta_4\Delta\text{SolarRadiation}_{st} + \beta_5\Delta\text{Rainfall}_{st} + \beta_6\Delta\text{Snowfall}_{st} + \beta_7\Delta I(0 \leq \text{Hour}_t < 10) + \beta_8 \Delta I(10 \leq \text{Hour}_t < 16) + \Delta\eta_{st}$
 
-This eliminates the $t-1$ temperature dependency (and all other lagged dependencies for $t-1$ in $X$) and isolates the short-run change in temperature, which is what we seek to estimate.
+This eliminates the $t-1$ temperature dependency (and all other lagged dependencies for $t-1$ in our independent variable matrix $X$) and isolates the short-run change in temperature, which is what we seek to estimate.
 
-In order to estimate the hourly demand for bike sharing in Seoul. Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. However, exploratory data analysis has shown that current bike demand is not strongly dependent on the bike demand from $t-1$. Instead of using a first-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates.
+After lasso regression with all the necessary interaction terms included, we reduced our model down to a more parsimonious one,
+
+$\Delta\text{Temperature}_{st} = \beta_1\Delta\text{Humidity}_{st} + \beta_2\Delta\text{DewPointTemp}_{st} + \beta_3\Delta\text{WindSpeed}_{st}+\beta_4\Delta\text{SolarRadiation}_{st}+\beta_5\Delta I(0 \leq \text{Hour}_t < 10) + \beta_6\Delta I(10 \leq \text{Hour}_t < 16) + \beta_7\Delta\text{SolarRadiation}_{st}I(10 \leq \text{Hour}_t < 16) + \Delta\eta_{st}$
+
+---
+
+In order to estimate the hourly demand for bike sharing in Seoul. Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. However, exploratory data analysis has shown that current bike demand is not strongly dependent on the bike demand from $t-1$. Instead of using a first-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates. We will use Spring as our base season.
+
+We transformed $\text{RentedBikeCount}_{st}$ with a $ln$ transformation. Upon further analysis, we also transformed $\text{Visibility}_{st}$ with a $f(x)=-\sqrt{x}$ transformation. We also noticed that different levels of $\text{Humidity}_{st}$ were affecting $\text{RentedBikeCount}_{st}$ in a non-linear fashion. Hence, we created 10 different levels for humidity as dummy variables, omitting the 0-10% level as the base level. We also noticed that extreme levels of $\text{WindSpeed}_{st}$ were also affecting $\text{RentedBikeCount}_{st}$. We created another variable, $I(\text{WindSpeed}_{st} > \phi(\text{WindSpeed}_s,0.95))$
 
 Hence, our basic fixed effects multivariate model for measuring the demand for rented bikes in Seoul will be interpreted as,
 
-$ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t < 20) + ... + \beta9I(90 \leq Humidity_t < 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}\sqrt{\text{Visibility}_{st}} + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_{st}$
+$ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t < 20) + ... + \beta9I(90 \leq Humidity_t < 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}(-\sqrt{\text{Visibility}_{st}}) + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_{st}$
 
 # 2 Analyses, Results, and Interpretation
 
@@ -358,7 +374,7 @@ lasso_cv <- cv.glmnet(x = seoul.x,
                       alpha = 1)
 
 d = coef(lasso_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
-lasso.factors = model.factors[which(d != 0)]
+lasso.factors = c(model.factors[which(d != 0)], "Hour1015")
 seoul.lasso = lm(TemperatureChange ~ 0 + .,
                                        seoul.temp[c("TemperatureChange",
                                        lasso.factors)])
@@ -701,7 +717,45 @@ show_leverage(seoul.bike.lasso)
 ```
 
 ```{r}
+seoul.temp.leverage = augment(seoul.lasso)
+seoul.temp.leverage$d = cooks.distance(seoul.lasso, type = "pearson")
+seoul.temp.leverage %>%
+  filter(d < 0.5) -> seoul.temp.leverage
 
+seoul.lasso = lm(TemperatureChange ~ 0 + .,
+                                       seoul.temp.leverage[c("TemperatureChange",
+                                       lasso.factors)])
+
+summary(seoul.lasso)
+
+
+autoplot(seoul.lasso)
+
+t = seoul.temp %>% mutate(
+  HumidityChange = HumidityChange + abs(min(HumidityChange)) + 1,
+  DewPointTempChange = DewPointTempChange + abs(min(DewPointTempChange)) + 1,
+  SolarRadiationChange = SolarRadiationChange + abs(min(SolarRadiationChange)) + 1,
+  WindSpeedChange = WindSpeedChange + abs(min(WindSpeedChange)) + 1
+)
+
+invTranPlot(TemperatureChange ~ SolarRadiationChange, data=t, lambda = c(-1, -0.5, 0, 0.5, 1, 2), optimal=T)
+bc = boxCox(t$TemperatureChange ~ t$Rainfall)
+lambda = bc$x[which(bc$y == max(bc$y))]
+lambda
+t$TemperatureChange = t$TemperatureChange^2
+
+
+seoul.temp$WindSpeedChange = log(seoul.temp$WindSpeedChange + abs(min(seoul.temp$WindSpeedChange)) + 1)
+seoul.temp$SolarRadiationChange = seoul.temp$SolarRadiationChange^2
+
+seoul.lasso.lm = lm(TemperatureChange ~ 0 + .,
+                                       seoul.temp.leverage[c("TemperatureChange",
+                                       lasso.factors)])
+summary(seoul.lasso.lm)
+
+# seoul.full.lm = lm(TemperatureChange ~ ., seoul.temp[c("TemperatureChange", model.factors)])
+# summary(seoul.full.lm)
+autoplot(seoul.full.lm)
 ```
 
 # 3 Conclusions
@@ -716,6 +770,51 @@ Give additional context to you results and interpretations from Section 5 with r
 seoul.temp$PredictedTemperatureChange = predict(seoul.lasso, seoul.temp)
 seoul.temp$PredictedTemperature = NA_real_
 
+seoul.temp$residual = seoul.temp$PredictedTemperatureChange-seoul.temp$TemperatureChange
+
+epsilon = 100
+influential_points = seoul.temp %>% arrange(desc(abs(residual))) %>% 
+  head(epsilon)
+
+#influential_points %>% View()
+
+influential.factors = tibble(
+  Magnitude = c(),
+  Factor = c(),
+  Rank = c()
+)
+
+for(i in 1:nrow(influential_points)){
+  point = influential_points[i,lasso.factors]
+  
+  factors = seoul.lasso$coefficients[1:length(seoul.lasso$coefficients)]*t(point)
+  
+  factors %>% as.data.frame() %>% arrange(desc(abs(V1))) %>%
+    setNames("Magnitude") %>%
+    rownames_to_column(var = "Factor") %>%
+    mutate(
+      Rank = length(lasso.factors):1
+    ) -> factors
+  
+  influential.factors = influential.factors %>% rbind(factors)
+}
+
+influential.factors %>% mutate(
+  AbsoluteMagnitude = abs(Magnitude)
+) %>% group_by(Factor) %>%
+  summarize(
+    avg_magnitude = mean(AbsoluteMagnitude),
+    avg_rank = mean(Rank)
+  ) %>% arrange(desc(avg_rank)) -> influential.factors
+
+top.influential.factors = influential.factors %>% head(6)
+
+for(factor in top.influential.factors$Factor){
+  hist(influential_points[factor] %>% unlist(), main=factor)
+}
+```
+
+```{r}
 for(s in seasons){
   temp = Temp %>% filter(Seasons == s) %>% pull(Temperature) %>%
     lag(n=1)
