@@ -56,8 +56,7 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
     IsHoliday = 1*(Holiday == "Holiday"),
     Hour09 = 1*(Hour %in% 0:9),
     Hour1018 = 1*(Hour %in% 10:18),
-    Hour1924 = 1*(Hour %in% 19:24),
-    TransformedRentedBikeCount = log(RentedBikeCount+1)
+    Hour1924 = 1*(Hour %in% 19:24)
   ) %>% arrange(Time)
 ```
 
@@ -108,6 +107,7 @@ seoul.factors = c("Temperature", "Humidity", "DewPointTemp",
 seoul.change = c()
 seoul.interaction = c()
 seoul.base = c(time.base)
+humidity.interactions = c()
 
 format_change_table = function(t=seoul, f=seoul.factors){
   for(factor in f){
@@ -184,20 +184,10 @@ calculate_deltas()
 bike.dummies = c("IsHoliday")
 seoul.bike.factors = c("RentedBikeCount", "Humidity", "Temperature",
                        "WindSpeed", "Visibility", "DewPointTemp",
-                       "SolarRadiation", "ExtremeWind",
+                       "SolarRadiation",
                        "Rainfall", "Snowfall", bike.dummies, time.bike,
                        season.dummies, bike.deltas)
 
-seoul %>% group_by(Seasons) %>%
-  mutate(
-    ExtremeWind = 1*(WindSpeed >= quantile(WindSpeed, 0.9)),
-    WindSpeedTransformed = ifelse(
-      WindSpeed < quantile(WindSpeed, 0.9), WindSpeed, 0
-    )
-  ) %>% ungroup() -> seoul
-
-#Transform Visibility
-seoul$VisibilityTransformed = seoul$Visibility^(-1/2)
 
 seoul.bike.transformed = c(time.humidities, "ExtremeWind", "WindSpeedTransformed",
                            "VisibilityTransformed")
@@ -207,19 +197,19 @@ seoul.bike.transformed = c(time.humidities, "ExtremeWind", "WindSpeedTransformed
 seoul.bike.interaction = c()
 seoul.bike.base = c(time.bike.base)
 
-create_interaction_terms = function(){
+create_interaction_terms = function(t){
   
   seoul.bike.interaction <<- c()
   
- continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
+  continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
                                         c(time.bike, season.dummies,
                                           time.humidities,
                                           "RentedBikeCount")), 2)
   for(i in 1:ncol(continuous_interactions_bike)){
     factor = paste(continuous_interactions_bike[,i], collapse = "X")
     seoul.bike.interaction <<- c(seoul.bike.interaction, factor)
-    seoul[factor] = seoul[continuous_interactions_bike[1,i]]*
-                    seoul[continuous_interactions_bike[2,i]]
+    t[factor] = t[continuous_interactions_bike[1,i]]*
+                    t[continuous_interactions_bike[2,i]]
   }
   
   for(factor in setdiff(seoul.bike.factors,
@@ -227,7 +217,7 @@ create_interaction_terms = function(){
     for(time in time.bike){
       factor.interaction = str_c(factor, "X", time)
       seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
-      seoul[factor.interaction] = seoul[factor]*seoul[time]
+      t[factor.interaction] = t[factor]*t[time]
     }
   }
   
@@ -237,10 +227,9 @@ create_interaction_terms = function(){
     for(s in season.dummies){
       factor.interaction = str_c(factor, "X", s)
       seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
-      seoul[factor.interaction] = seoul[factor]*seoul[s]
+      t[factor.interaction] = t[factor]*t[s]
     }
   }
-  
   #Humidity and Other Weather Effects
   for(factor in setdiff(seoul.bike.factors,
                           c(time.bike, season.dummies,
@@ -249,13 +238,15 @@ create_interaction_terms = function(){
     for(humidity in time.humidities){
       factor.interaction = str_c(factor, "X", humidity)
       seoul.bike.interaction <<- c(seoul.bike.interaction, factor.interaction)
-      seoul[factor.interaction] = seoul[factor]*seoul[humidity]
+      humidity.interactions <<- c(humidity.interactions, factor.interaction)
+      t[factor.interaction] = t[factor]*t[humidity]
     }
   } 
- 
- seoul <<- seoul
+
+  
+ return(t)
 }
-create_interaction_terms()
+seoul = create_interaction_terms(seoul)
 
 seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
@@ -330,11 +321,19 @@ show_leverage = function(model){
 }
 ```
 
-According to the model diagnostics [A.1.0](#a10), the linearity assumption seems to met (see [A.1](#a11) for added variable plots). Additionally, though there were some points moving the model away from homoskedasticity the $\sqrt{|\text{standardized residuals}|)}$ vs. Fitted values Plot shows that homoskedasticity is roughly met. However, the normality assumption was blatantly violated so we considered adding in interaction terms.
+According to the model diagnostics [A.1.0](#a10), the linearity assumption seems to met (see [A.1](#a11) for added variable plots). Additionally, though there were some points moving the model away from homoskedasticity the $\sqrt{|\text{Standardized residuals}|)}$ vs. Fitted values Plot shows that homoskedasticity is roughly met. However, the normality assumption was blatantly violated so we considered adding in interaction terms.
 
 We used elastic net regression to select interaction terms to see if the influential points (and thus, Normality) could be remedied. We used elastic net regression over lasso regression due to the potential colinearity between $\text{HumidityChange}_{st}$ and other weather effects.
 
-```{r echo=FALSE}
+(See [A.2.0](#a20) for model output)
+
+However, even with selected interaction terms included, Normality did not drastically improve (see [A.2.1](#a21) for QQ-Plot).
+
+We considered transforming the model ([A.3](#a3)) to better meet Normality and somewhat homoskedasticity. However, due to the nature of our $X$ variable matrix--since each independent variable is a change in a variable, we thus had to shift the entire vector of that corresponding variable in order to derive optimal transformations. Hence, interpreting the any transformations we would make would prove difficult and impractical.
+
+However, with large sample size ($n=8740$), Normality could be appealed to. The residuals do appear to be Normal, though extreme values cause deviations from Normality at the tails as seen in the QQ-plot. We considered alternatives to meeting the assumptions such as linear robust regression to reduce the weights of outliers. One alternative is further discussed in [A.4](#a4), where we considered estimating a model for each season.
+
+```{r echo=F}
 model.factors = setdiff(c(seoul.change, seoul.interaction), 
                         c(seoul.base, "TemperatureChange"))
 
@@ -352,17 +351,7 @@ elastic.factors = c(elastic.factors, setdiff(c(str_c(time.bike, "Change"), "Rain
 seoul.elastic = lm(TemperatureChange ~ 0 + .,
                                        seoul.temp[c("TemperatureChange",
                                        elastic.factors)])
-```
 
-(The summary output is too long to be included here, see [A.2.0](#a20) for model output)
-
-However, even with selected interaction terms included, Normality did not drastically improve (see [A.2.1](#a21) for QQ-Plot).
-
-We considered transforming the model ([A.3](#a3)) to better meet Normality and somewhat homoskedasticity. However, due to the nature of our $X$ variable matrix--since each independent variable is a change in a variable, we thus had to shift the entire vector of that corresponding variable in order to derive optimal transformations. Hence, interpreting the any transformations we would make would prove difficult and impractical.
-
-However, with large sample size ($n=8740$), Normality could be appealed to. The residuals do appear to be Normal, though extreme values cause deviations from Normality at the tails as seen in the QQ-plot. We considered alternatives to meeting the assumptions such as linear robust regression to reduce the weights of outliers. One alternative is further discussed in [A.4](#a4), where we considered estimating a model for each season.
-
-```{r echo=F}
 seoul.elastic$residuals %>% 
   hist(main="Histogram of Residuals from Elastic Net Regression", col="steelblue")
 ```
@@ -384,37 +373,47 @@ Similar to our model for temperature, we have unobserved seasonal effects in $\e
 ```{r echo=F}
 threshold = 0.25
 seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
-  geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip), size=0.5)+
+  geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip), size=0.25)+
   facet_grid(~Seasons)
 ```
+Preliminary EDA shows that precipitation (rain and snow) will have a significant negative effect on rented bike demand.
+
 
 Hence, we will first estimate the hourly demand for rented bikes in Seoul with the following model,
 
-(3) $\text{RentedBikeCount}_{st} = \beta_0 + \beta_1\text{Humidity}_{st} + \beta_{2}\text{Temperature}_{st} + \beta_{3}\text{WindSpeed}_{st} + \beta_{4}\text{Visibility}_{st} + \beta_{5}\text{DewPointTemp}_{st} + \beta_{6}\text{SolarRadiation}_{st} + \beta_{7}\text{Rainfall}_{st} + \beta_{8}\text{Snowfall}_{st} + \beta_{9}I(\text{Day}_t = Holiday) + \beta_{10}I(\text{Hour}_t = 1) + ... + \beta_{32}I(\text{Hour}_t = 23) + \beta_{33}I(\text{Season}_s = Winter) + \beta_{34}I(\text{Season}_s = Summer) + \beta_{35}I(\text{Season}_s = Autumn) + \delta_1\text{RentedBikeCount}_{st-1} + \delta_{23}\text{RentedBikeCount}_{st-23} + \sum_{p=1}^{9}\delta_p + \eta_{st}$
+(3) $\text{RentedBikeCount}_{st} = \beta_0 + \beta_1\text{Humidity}_{st} + \beta_{2}\text{Temperature}_{st} + \beta_{3}\text{WindSpeed}_{st} + \beta_{4}\text{Visibility}_{st} + \beta_{5}\text{DewPointTemp}_{st} + \beta_{6}\text{SolarRadiation}_{st} + \beta_{7}\text{Rainfall}_{st} + \beta_{8}\text{Snowfall}_{st} + \beta_{9}I(\text{Day}_t = Holiday) + \beta_{10}I(\text{Hour}_t = 1) + ... + \beta_{32}I(\text{Hour}_t = 23) + \beta_{33}I(\text{Season}_s = \text{Winter}) + \beta_{34}I(\text{Season}_s = \text{Summer}) + \beta_{35}I(\text{Season}_s = \text{Autumn}) + \delta_1\text{RentedBikeCount}_{st-1} + \delta_{23}\text{RentedBikeCount}_{st-23} + \sum_{p=1}^{9}\delta_p + \eta_{st}$
 
-```{r}
-model.3.factors = c(seoul.bike.factors, 
-                                bike.deltas)%>% setdiff(c(
-                                time.humidities, seoul.bike.transformed))
+$\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
 
-seoul.bike.lm = lm(RentedBikeCount ~ ., 
-                   data=seoul[model.3.factors])
-summary(seoul.bike.lm)
-autoplot(seoul.bike.lm)
-show_leverage(seoul.bike.lm)
-```
+Diagnostics for fitting this model to this data indicate that linearity is met [A.8](#a8). Additionally, due to the large sample size, the leverage plot also indicates that there were not any influential points. However, since homoskedasticity was blatantly violated, especially for fitted values $ < 1000$, we modified the model by including interaction terms.
 
-```{r}
+We ran an elastic net regression model to control for colinearity. (See model [A.9](#a9) for model output and diagnostics). Since $\text{RentedBikeCount}_{st}$ is likely poisson-distributed, we considered log-transforming the response, but diagnostics show that model assumptions did not improve [A.10.0](#a100).
+
+However, we noticed non-linear trends in $\text{Humidity}_{st}$ against $\text{RentedBikeCount}_{st}$ and introduced categorical transformations [A.10.1](#a101). Using an inverse response plot, we also found that we could optimally transform $\text{Visibility}_{st}$ using a $log$ transformation [A.10.2](#a102). Lastly, we transformed $\text{WindSpeed}_{st}$ since we noticed that extreme values were causing some non-linearity between the response. Hence, we introduced a categorical variable called $\text{ExtremeWind}_{st}$ to capture this effect [A.10.3](#a103).
+
+```{r echo=F}
+seoul %>% group_by(Seasons) %>%
+  mutate(
+    ExtremeWind = 1*(WindSpeed >= quantile(WindSpeed, 0.9)),
+    WindSpeed = ifelse(
+      WindSpeed < quantile(WindSpeed, 0.9), log(WindSpeed+1), 0
+    )
+  ) %>% ungroup() -> seoul.bike
+
+seoul.bike.factors.alt = c(seoul.bike.factors, "ExtremeWind")
+seoul.bike$Visibility = log(seoul$Visibility+1)
+seoul.bike <- create_interaction_terms(seoul.bike)
+
 singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
                   "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
                   "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
                   "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
                   "SnowfallXIsAutumn")
-model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
+model.bike.factors = setdiff(c(seoul.bike.factors.alt, seoul.bike.interaction), 
                              c(seoul.bike.base, "RentedBikeCount", singularities))
 
-seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
-seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+seoul.bike.x = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
+seoul.bike.y = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
 
 elastic_cv <- cv.glmnet(x = seoul.bike.x,
                       y = seoul.bike.y, 
@@ -422,22 +421,38 @@ elastic_cv <- cv.glmnet(x = seoul.bike.x,
                       alpha = 1)
 
 d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
-elastic.bike.factors = model.bike.factors[which(d != 0)]
-seoul.bike.elastic = lm(RentedBikeCount ~ .,
-                                       seoul[c("RentedBikeCount",
-                                       elastic.bike.factors)])
 
-print(summary(seoul.bike.elastic))
-autoplot(seoul.bike.elastic)
-show_leverage(seoul.bike.elastic)
+
+elastic.bike.factors = c(model.bike.factors[which(d != 0)])
+
+#Add lower level terms
+elastic.bike.factors = c(elastic.bike.factors, 
+                         setdiff(seoul.bike.factors.alt,
+                        c("RentedBikeCount", elastic.bike.factors)))
+
+seoul.bike.elastic = lm(RentedBikeCount ~ .,
+                                       seoul.bike[c("RentedBikeCount",
+                                       elastic.bike.factors)])
 ```
 
+Using an elastic net regression method to determine once again the appropriate coefficients to include [A.11](#a11), we have determined our final model for measuring the demand for rented bikes in Seoul,
 
-We transformed $\text{RentedBikeCount}_{st}$ with a $ln$ transformation. Upon further analysis, we also transformed $\text{Visibility}_{st}$ with a $f(x)=-\sqrt{x}$ transformation. We also noticed that different levels of $\text{Humidity}_{st}$ were affecting $\text{RentedBikeCount}_{st}$ in a non-linear fashion. Hence, we created 10 different levels for humidity as dummy variables, omitting the 0-10% level as the base level. We also noticed that extreme levels of $\text{WindSpeed}_{st}$ were also affecting $\text{RentedBikeCount}_{st}$. We created another variable, $I(\text{WindSpeed}_{st} > \phi(\text{WindSpeed}_s,0.95))$
+$\text{RentedBikeCount}_{st} = \beta_0 + \beta_1ln(\text{Visibility}_{st}+1) + \beta_2\text{Rainfall}_{st} + \beta_3\text{Humidity}_{st}+\beta_4\text{Temperature}_{st}+\beta_5(ln\text{WindSpeed}_{st}+1)+\beta_6I(\text{ExtremeWind}_{st}=1)+\beta_7\text{DewPointTemp}_{st}+\beta_8\text{Snowfall}_{st}+\beta_9\text{SolarRadiation}_{st}+\beta_{10}I(\text{Day}_t=\text{Holiday}_{t})\\+\beta_{11}I(\text{Season}_s = \text{Winter}) + \beta_{12}I(\text{Season}_s = \text{Summer}) + \beta_{13}I(\text{Season}_s = \text{Autumn}) + \sum_{t=1}^{23}\beta_{13+t}I(\text{Hour}_t=t) \\\sum_{p=1}^{9}\delta_p\text{RentedBikeCount}_{st-p} + \beta_{36}\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \eta_{st}$
 
-Hence, our basic fixed effects multivariate model for measuring the demand for rented bikes in Seoul will be interpreted as,
-
-$ln(\text{RentedBikeCount}_{st}+1) = \beta_0 + \beta_1I(10 \leq Humidity_t < 20) + ... + \beta9I(90 \leq Humidity_t < 100) + \beta_{10}\text{Temperature}_{st} + \beta_{11}\text{WindSpeed}_{st} + \beta_{12}(-\sqrt{\text{Visibility}_{st}}) + \beta_{13}I(\text{ExtremeWind}_{st} = \text{Yes}) + \beta_{14}\text{DewPointTemp}_{st} + \beta_{15}\text{SolarRadiation}_{st} + \beta_{16}\text{Rainfall}_{st} + \beta_{17}\text{Snowfall}_{st} + \beta_{18}I(\text{Day}_t = Holiday) + \beta_{19}I(\text{Hour}_t = 1) + ... + \beta_{41}I(\text{Hour}_t = 23) + \beta_{42}I(\text{Season}_s = Winter) + \beta_{43}I(\text{Season}_s = Summer) + \beta_{44}I(\text{Season}_s = Autumn) + \eta_{st}$
+```{r warning=F}
+seoul.bike$PredictedBikeCount = predict(seoul.bike.elastic, seoul.bike)
+seoul.bike %>% 
+  ggplot()+
+  geom_line(aes(x=Time, y=RentedBikeCount, color="Actual"), alpha=1)+
+  geom_line(aes(x=Time, y=PredictedBikeCount,
+                color="Predicted"), alpha=0.3)+
+  facet_grid(~factor(seoul$Seasons, levels=c("Winter", "Spring", "Summer", "Autumn")), scales="free_x")+
+  labs(title="Predicted Bike Demand in Seoul Over Time",
+       color=NULL)+
+  xlab("Time")+
+  ylab("Rented Bike Count")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
+```
 
 ## Forecast
 
@@ -544,7 +559,7 @@ Hence, we chose $k$ = `r first(ks)`
 Regression output and diagnostics for Model (1)
 
 ```{r}
-seoul.lm = lm(TemperatureChange ~ 0 + ., data=seoul.temp[c(seoul.change)])
+seoul.lm = lm(TemperatureChange ~ 0 + ., data=seoul.temp[unique(seoul.change)])
 summary(seoul.lm)
 
 autoplot(seoul.lm)
@@ -562,6 +577,26 @@ avPlots(seoul.lm)
 #### A.2.0 {#a20}
 
 Elastic Net Regression on Model (1) w/ interaction terms
+
+```{r}
+model.factors = setdiff(c(seoul.change, seoul.interaction), 
+                        c(seoul.base, "TemperatureChange"))
+
+seoul.x = as.matrix(seoul.temp[model.factors])
+seoul.y = as.matrix(seoul.temp["TemperatureChange"])
+
+elastic_cv <- cv.glmnet(x = seoul.x,
+                      y = seoul.y, 
+                      type.measure = "mse", 
+                      alpha = 0.5)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
+elastic.factors = c(model.factors[which(d != 0)])
+elastic.factors = c(elastic.factors, setdiff(c(str_c(time.bike, "Change"), "RainfallChange"), elastic.factors))
+seoul.elastic = lm(TemperatureChange ~ 0 + .,
+                                       seoul.temp[c("TemperatureChange",
+                                       elastic.factors)])
+```
 
 ```{r}
 summary(seoul.elastic)
@@ -670,14 +705,15 @@ Most assailant factors in Model (2) (hour changes excluded)
 
 ```{r}
 elastic.coef = tibble(
-  Rank = 1:length(seoul.elastic$coefficients),
   Factor = names(seoul.elastic$coefficients),
   Coefficient = seoul.elastic$coefficients,
   P.Value = summary(seoul.elastic)$coefficients[,"Pr(>|t|)"] %>% round(5) %>%
     format(scientific=F)
-)
+) %>% arrange(abs(Coefficient) %>% desc())
 
-elastic.coef %>% arrange(abs(Coefficient) %>% desc()) %>% 
+elastic.coef$Rank = 1:nrow(elastic.coef)
+
+elastic.coef %>% 
   filter(!(Factor %in% str_c(time.bike, "Change"))) %>%
   knitr::kable()
 ```
@@ -777,3 +813,233 @@ for(season in seoul$Seasons %>% unique()){
 ```
 
 Since Spring is our base season, we will include $p=9$ lagged effects for $\text{RentedBikeCount}_{st}$ in the base model, and since no other season has $p > 9$, we do not need any other lagged effects dependent on season.
+
+#### A.8 {#a8}
+
+Fitting a linear model to estimate parameters for Model (3)
+
+```{r}
+model.3.factors = c(seoul.bike.factors, 
+                                bike.deltas)%>% setdiff(c(
+                                time.humidities, seoul.bike.transformed))
+
+seoul.bike.lm = lm(RentedBikeCount ~ ., 
+                   data=seoul[model.3.factors])
+summary(seoul.bike.lm)
+autoplot(seoul.bike.lm)
+show_leverage(seoul.bike.lm)
+```
+
+Linearity seems to be roughly met and even Normality can be appealed to. However, in the $\sqrt{|\text{Standardized residuals}|)}$ vs. Fitted values Plot, homoskedasticity appears to be violated, with some interesting trends happening with fitted values $ < 1000$.
+
+#### A.9 {#a9}
+
+Including all necessary interaction terms, we ran an elastic net regression to see if we could better meet the model assumptions.
+
+```{r}
+singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
+                  "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
+                  "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
+                  "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
+                  "SnowfallXIsAutumn")
+model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
+                             c(seoul.bike.base, "RentedBikeCount", singularities,
+                               humidity.interactions))
+
+seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
+seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+
+elastic_cv <- cv.glmnet(x = seoul.bike.x,
+                      y = seoul.bike.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
+elastic.bike.factors = model.bike.factors[which(d != 0)]
+seoul.bike.elastic = lm(RentedBikeCount ~ .,
+                                       seoul[c("RentedBikeCount",
+                                       elastic.bike.factors)])
+
+print(summary(seoul.bike.elastic))
+autoplot(seoul.bike.elastic)
+show_leverage(seoul.bike.elastic)
+```
+
+#### A.10.0 {#a100}
+
+Transformations of Model (3)
+
+We first considered a log transformation of $\text{RentedBikeCount}_{st}$
+
+```{r}
+seoul$RentedBikeCount = log(seoul$RentedBikeCount + 1)
+calculate_deltas()
+seoul = create_interaction_terms(seoul)
+
+seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
+seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+
+elastic_cv <- cv.glmnet(x = seoul.bike.x,
+                      y = seoul.bike.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
+elastic.bike.factors.log = model.bike.factors[which(d != 0)]
+seoul.bike.elastic.log = lm(RentedBikeCount ~ .,
+                                       seoul[c("RentedBikeCount",
+                                       elastic.bike.factors.log)])
+
+print(summary(seoul.bike.elastic.log))
+autoplot(seoul.bike.elastic.log)
+show_leverage(seoul.bike.elastic.log)
+```
+
+Strange trends happen in homoskedasticity when fitted values approach zero, which may be exacerbating the strange trends seen in the Residuals vs. Fitted values plot. Overall, the model assumptions did not approve with a log transformation.
+
+```{r echo=F}
+#Change it back
+seoul$RentedBikeCount = exp(seoul$RentedBikeCount)-1
+calculate_deltas()
+seoul = create_interaction_terms(seoul)
+```
+
+#### A.10.1 {#a101}
+
+Non-linearity in the Humidity vs. # of Rented Bikes
+
+```{r message=F}
+seoul %>% ggplot(aes(x=Humidity, y=RentedBikeCount))+
+  geom_point()+
+  geom_smooth(method="lm", se=F)+
+  facet_grid(~Seasons)
+
+t = seoul %>%
+  mutate(
+    Humidity = Humidity + 1,
+    Visibility = Visibility + 1,
+    WindSpeed = WindSpeed + 1,
+  )
+
+invTranPlot(RentedBikeCount ~ Humidity, data=t, 
+            lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+```
+
+Due to the non-linearity in $\text{Humidity}_{st}$, and the impracticality of transforming it (a $\lambda = 6$ is not ideally interpretable), we decided to include 9 (ommitting a first level to preserve the full rank of $X'X$) levels of humidity as dummy variables to isolate non-linear effects.
+
+Hence, we included $\sum_{i=1}^{9}\beta_iI(10i \leq Humidity_{st} < 10(i+1))$ as categorical variables.
+
+#### A.10.2 {#a102}
+
+An ideal transformation for $\text{Visibility}_{st}$
+
+```{r}
+invTranPlot(RentedBikeCount ~ Visibility, data=t, 
+            lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+```
+
+Based on the Inverse Response Plot, the best transformation for $\text{Visibility}_{st}$ for interpretable results is a $log$ transformation ($\lambda=0$).
+
+#### A.10.3 {#a103}
+
+Transforming $\text{WindSpeed}_{st}$
+
+```{r}
+invTranPlot(RentedBikeCount ~ WindSpeed, data=t, 
+            lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+```
+
+An ideal transformation for $\text{WindSpeed}_{st}$ could be an inverse transformation. However, upon further analysis of the sample distribution of $\text{WindSpeed}_{st}$, there are extreme values of wind that may be skewing the results:
+
+```{r}
+hist(seoul$WindSpeed, main="Histogram of Wind Speed (m/s)",
+     xlab="Wind Speed (m/s)")
+```
+
+Hence, filtering out extreme values of wind,
+
+```{r}
+t %>% filter(WindSpeed < quantile(WindSpeed, 0.9)) -> t
+
+invTranPlot(RentedBikeCount ~ WindSpeed, data=t, 
+            lambda = c(-1, -0.5, 0, 0.5, 1), optimal=T)
+```
+
+We will apply two transformations as follows:
+
+(1) Define a new categorical variable called $\text{ExtremeWind}_{st}$ that will be either 1 or 0 depending if $\text{WindSpeed}_{st} \geq \phi(0.9|\text{Season}=s)$, where $\phi$ is the inverse CDF of $F(\text{WindSpeed}_{st} \leq c)$
+(2) Transform $\text{WindSpeed}_{st}$ such that values that classify as $\text{ExtremeWind}_{st}$ are 0, and all other values follow a $log$ transformation as denoted by the inverse response plot.
+
+This isolates the linear trend in the "non-extreme" wind-speeds, and gives the extreme wind categorical variable it's own marginal effect that we can distinguish.
+
+#### A.11 {#a11}
+
+Elastic net regression and output on Model (4)
+
+```{r}
+seoul %>% group_by(Seasons) %>%
+  mutate(
+    ExtremeWind = 1*(WindSpeed >= quantile(WindSpeed, 0.9)),
+    WindSpeed = ifelse(
+      WindSpeed < quantile(WindSpeed, 0.9), log(WindSpeed+1), 0
+    )
+  ) %>% ungroup() -> seoul
+
+seoul.bike.factors = c(seoul.bike.factors, "ExtremeWind")
+seoul$Visibility = log(seoul$Visibility+1)
+seoul = create_interaction_terms(seoul)
+
+singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
+                  "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
+                  "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
+                  "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
+                  "SnowfallXIsAutumn")
+model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
+                             c(seoul.bike.base, "RentedBikeCount", singularities))
+
+seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
+seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+
+elastic_cv <- cv.glmnet(x = seoul.bike.x,
+                      y = seoul.bike.y, 
+                      type.measure = "mse", 
+                      alpha = 1)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.bike.factors)-1)]
+
+
+elastic.bike.factors = c(model.bike.factors[which(d != 0)])
+
+#Add lower level terms
+elastic.bike.factors = c(elastic.bike.factors, 
+                         setdiff(seoul.bike.factors,
+                        c("RentedBikeCount", elastic.bike.factors)))
+
+seoul.bike.elastic = lm(RentedBikeCount ~ .,
+                                       seoul[c("RentedBikeCount",
+                                       elastic.bike.factors)])
+
+print(summary(seoul.bike.elastic))
+autoplot(seoul.bike.elastic)
+show_leverage(seoul.bike.elastic)
+```
+
+#### A.12
+
+Most Assailant Factors for Model (4), w/ lagged effects (and lagged interactions) and lower level time effects removed
+
+```{r}
+elastic.bike.coef = tibble(
+  Factor = names(seoul.bike.elastic$coefficients),
+  Coefficient = seoul.bike.elastic$coefficients,
+  P.Value = summary(seoul.bike.elastic)$coefficients[,"Pr(>|t|)"] %>% round(5) %>%
+    format(scientific=F)
+) %>% arrange(abs(Coefficient) %>% desc())
+
+elastic.bike.coef$Rank = 1:nrow(elastic.bike.coef)
+
+elastic.bike.coef %>% 
+  filter(!(str_detect(Factor, "RentedBikeCount") | 
+           Factor %in% time.bike)) %>%
+  knitr::kable()
+```
