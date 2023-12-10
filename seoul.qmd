@@ -197,11 +197,11 @@ seoul.bike.transformed = c(time.humidities, "ExtremeWind", "WindSpeedTransformed
 seoul.bike.interaction = c()
 seoul.bike.base = c(time.bike.base)
 
-create_interaction_terms = function(t){
+create_interaction_terms = function(t, f=seoul.bike.factors){
   
   seoul.bike.interaction <<- c()
   
-  continuous_interactions_bike = combn(setdiff(seoul.bike.factors, 
+  continuous_interactions_bike = combn(setdiff(f, 
                                         c(time.bike, season.dummies,
                                           time.humidities,
                                           "RentedBikeCount")), 2)
@@ -212,7 +212,7 @@ create_interaction_terms = function(t){
                     t[continuous_interactions_bike[2,i]]
   }
   
-  for(factor in setdiff(seoul.bike.factors,
+  for(factor in setdiff(f,
                           c(time.bike, season.dummies, "RentedBikeCount"))){
     for(time in time.bike){
       factor.interaction = str_c(factor, "X", time)
@@ -222,7 +222,7 @@ create_interaction_terms = function(t){
   }
   
   #Seasonal Interactions
-  for(factor in setdiff(seoul.bike.factors,
+  for(factor in setdiff(f,
                           c(season.dummies, "RentedBikeCount"))){
     for(s in season.dummies){
       factor.interaction = str_c(factor, "X", s)
@@ -231,7 +231,7 @@ create_interaction_terms = function(t){
     }
   }
   #Humidity and Other Weather Effects
-  for(factor in setdiff(seoul.bike.factors,
+  for(factor in setdiff(f,
                           c(time.bike, season.dummies,
                                             time.humidities,
                                             "RentedBikeCount"))){
@@ -251,7 +251,7 @@ seoul = create_interaction_terms(seoul)
 seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
 
-## 1.3 Regression Methods
+## Regression Methods
 
 Temperature is highly dependent on the temperature from the hour before ($t-1$): $\frac{\hat{\text{Cov}}(\text{Temperature}_t,\text{Temperature}_{t-1})}{\hat{Var}(\text{Temperature}_t)}$ = `r round(lm(seoul$Temperature ~ lag(seoul$Temperature, n=1))$coef[2], 4)` (which is significant). Since we have hourly data, running a first difference regression model will, though eliminate the dependency on the value from $t-1$, may also leave the dependency from $t-2,...t-(k-1)$ left over. If $\Delta\text{Temperature}_t = \text{Temperature}_t - \text{Temperature}_{t-k}$, We will find the $k$ (the $k$th difference) such that there is no longer a direct dependency between $\Delta\text{Temperature}_t$ and $\Delta\text{Temperature}_{t-k}$. In other words, We want to find the smallest possible $k$ such that $cov(\Delta\text{Temperature}_t, \Delta\text{Temperature}_{t-k}) = 0$.
 
@@ -400,9 +400,9 @@ seoul %>% group_by(Seasons) %>%
     )
   ) %>% ungroup() -> seoul.bike
 
-seoul.bike.factors.alt = c(seoul.bike.factors, "ExtremeWind")
+seoul.bike.factors.alt = c(setdiff(seoul.bike.factors, "Humidity"), time.humidities, "ExtremeWind")
 seoul.bike$Visibility = log(seoul$Visibility+1)
-seoul.bike <- create_interaction_terms(seoul.bike)
+seoul.bike <- create_interaction_terms(seoul.bike, seoul.bike.factors.alt)
 
 singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
                   "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
@@ -412,8 +412,8 @@ singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiatio
 model.bike.factors = setdiff(c(seoul.bike.factors.alt, seoul.bike.interaction), 
                              c(seoul.bike.base, "RentedBikeCount", singularities))
 
-seoul.bike.x = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
-seoul.bike.y = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
+seoul.bike.x = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul.bike),model.bike.factors])
+seoul.bike.y = as.matrix(seoul.bike[(length(bike.deltas)+1):nrow(seoul.bike),"RentedBikeCount"])
 
 elastic_cv <- cv.glmnet(x = seoul.bike.x,
                       y = seoul.bike.y, 
@@ -437,9 +437,13 @@ seoul.bike.elastic = lm(RentedBikeCount ~ .,
 
 Using an elastic net regression method to determine once again the appropriate coefficients to include [A.11](#a11), we have determined our final model for measuring the demand for rented bikes in Seoul,
 
-$\text{RentedBikeCount}_{st} = \beta_0 + \beta_1ln(\text{Visibility}_{st}+1) + \beta_2\text{Rainfall}_{st} + \beta_3\text{Humidity}_{st}+\beta_4\text{Temperature}_{st}+\beta_5(ln\text{WindSpeed}_{st}+1)+\beta_6I(\text{ExtremeWind}_{st}=1)+\beta_7\text{DewPointTemp}_{st}+\beta_8\text{Snowfall}_{st}+\beta_9\text{SolarRadiation}_{st}+\beta_{10}I(\text{Day}_t=\text{Holiday}_{t})\\+\beta_{11}I(\text{Season}_s = \text{Winter}) + \beta_{12}I(\text{Season}_s = \text{Summer}) + \beta_{13}I(\text{Season}_s = \text{Autumn}) + \sum_{t=1}^{23}\beta_{13+t}I(\text{Hour}_t=t) \\\sum_{p=1}^{9}\delta_p\text{RentedBikeCount}_{st-p} + \beta_{36}\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \eta_{st}$
+(4) $\text{RentedBikeCount}_{st} = \beta_0 + \sum_{i=1}^{9}\beta_iI(10i\leq\text{Humidity}_{st}< 10(i+1))+...+ \beta_{11}\text{Rainfall}_{st} +...+\beta_{17}\text{SolarRadiation}_{st}+\beta_{19}I(\text{Season}_s = \text{Winter}) + \beta_{20}I(\text{Season}_s = \text{Summer}) + \beta_{21}I(\text{Season}_s = \text{Autumn}) + ...+\beta_{240}\text{SolarRadiation}_{st}I(\text{Hour}_t=8)+\beta_{241}\text{SolarRadiation}_{st}I(\text{Hour}_t=19)+\beta_{242}\text{Rainfall}_{st}I(\text{Hour}_t=9)+\beta_{243}\text{Rainfall}_{st}I(\text{Hour}_t=13)+\beta_{244}\text{Rainfall}_{st}I(\text{Hour}_t=17)+\beta_{245}\text{Rainfall}_{st}I(\text{Hour}_t=19)+\beta_{246}\text{Rainfall}_{st}I(\text{Hour}_t=20)+...+\beta_{255}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Summer})+\beta_{256}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Autumn})+\beta_{257}\text{Rainfall}_{st}I(\text{Season}_s=\text{Winter})+\sum_{i=1}^{23}\sum_{\text{All } j \in \text{Seasons, }j\neq\text{Spring}}\beta_{257+i*jth\text{ Season}}I(\text{Hour}_t=i)I(\text{Season}_s=j)+\sum_{i=i}^{3}\beta_{327+i}I(60+10i\leq\text{Humidity}_{st}<60+10(i+1))I(\text{Season}_s=\text{Autumn})+\beta_{331}I(60\leq\text{Humidity}_{st}<70)I(\text{Season}_s=\text{Summer})+\beta_{334}\text{SolarRadiation}_{st}I(60\leq\text{Humidity}_{st}<70)+\sum_{i=1}^{4}\beta_{335+i}\text{SolarRadiation}_{st}I(50+10i\leq\text{Humidity}_{st}<60+10(i+1))+\sum_{i=1}^{3}\beta_{339+i}\text{Rainfall}_{st}I(30+10i\leq\text{Humidity}_{st}<30+10(i+1))+\beta_{343}\text{Rainfall}_{st}I(90\leq\text{Humidity}_{st}<100)I(\text{Hour}_t=t) + \eta_{st}$
 
-```{r warning=F}
+$\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
+
+(The full model is referenced in [A.13](#a13), only assailant terms are included for simplicity.
+
+```{r warning=F, echo=F}
 seoul.bike$PredictedBikeCount = predict(seoul.bike.elastic, seoul.bike)
 seoul.bike %>% 
   ggplot()+
@@ -453,6 +457,8 @@ seoul.bike %>%
   ylab("Rented Bike Count")+
   theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
 ```
+
+
 
 ## Forecast
 
@@ -842,6 +848,9 @@ singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiatio
                   "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
                   "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
                   "SnowfallXIsAutumn")
+
+seoul = create_interaction_terms(seoul)
+
 model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
                              c(seoul.bike.base, "RentedBikeCount", singularities,
                                humidity.interactions))
@@ -977,29 +986,6 @@ This isolates the linear trend in the "non-extreme" wind-speeds, and gives the e
 Elastic net regression and output on Model (4)
 
 ```{r}
-seoul %>% group_by(Seasons) %>%
-  mutate(
-    ExtremeWind = 1*(WindSpeed >= quantile(WindSpeed, 0.9)),
-    WindSpeed = ifelse(
-      WindSpeed < quantile(WindSpeed, 0.9), log(WindSpeed+1), 0
-    )
-  ) %>% ungroup() -> seoul
-
-seoul.bike.factors = c(seoul.bike.factors, "ExtremeWind")
-seoul$Visibility = log(seoul$Visibility+1)
-seoul = create_interaction_terms(seoul)
-
-singularities = c("SolarRadiationXHour1", "SolarRadiationXHour2", "SolarRadiationXHour3",
-                  "SnowfallXIsFunctioningDay", "SolarRadiationXHour4",
-                  "SolarRadiationXHour5", "SolarRadiationXHour20", "SolarRadiationXHour21",
-                  "SolarRadiationXHour22", "SolarRadiationXHour23", "SnowfallXIsSummer",
-                  "SnowfallXIsAutumn")
-model.bike.factors = setdiff(c(seoul.bike.factors, seoul.bike.interaction), 
-                             c(seoul.bike.base, "RentedBikeCount", singularities))
-
-seoul.bike.x = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),model.bike.factors])
-seoul.bike.y = as.matrix(seoul[(length(bike.deltas)+1):nrow(seoul),"RentedBikeCount"])
-
 elastic_cv <- cv.glmnet(x = seoul.bike.x,
                       y = seoul.bike.y, 
                       type.measure = "mse", 
@@ -1012,11 +998,11 @@ elastic.bike.factors = c(model.bike.factors[which(d != 0)])
 
 #Add lower level terms
 elastic.bike.factors = c(elastic.bike.factors, 
-                         setdiff(seoul.bike.factors,
+                         setdiff(seoul.bike.factors.alt,
                         c("RentedBikeCount", elastic.bike.factors)))
 
 seoul.bike.elastic = lm(RentedBikeCount ~ .,
-                                       seoul[c("RentedBikeCount",
+                                       seoul.bike[c("RentedBikeCount",
                                        elastic.bike.factors)])
 
 print(summary(seoul.bike.elastic))
@@ -1042,4 +1028,22 @@ elastic.bike.coef %>%
   filter(!(str_detect(Factor, "RentedBikeCount") | 
            Factor %in% time.bike)) %>%
   knitr::kable()
+```
+
+#### A.13 {#a13}
+
+The full model (Model 4), can be written as, 
+
+$\text{RentedBikeCount}_{st} = \beta_0 + \sum_{i=1}^{9}\beta_iI(10i\leq\text{Humidity}_{st}< 10(i+1))+\beta_{10}ln(\text{Visibility}_{st}+1) + \beta_{11}\text{Rainfall}_{st} +\beta_{12}\text{Temperature}_{st}+\beta_{13}(ln\text{WindSpeed}_{st}+1)+\beta_{14}I(\text{ExtremeWind}_{st}=1)+\beta_{15}\text{DewPointTemp}_{st}+\beta_{16}\text{Snowfall}_{st}+\beta_{17}\text{SolarRadiation}_{st}+\\\beta_{18}I(\text{Day}_t=\text{Holiday}_{t})+\beta_{19}I(\text{Season}_s = \text{Winter}) + \beta_{20}I(\text{Season}_s = \text{Summer}) + \beta_{21}I(\text{Season}_s = \text{Autumn}) + \sum_{i=1}^{23}\beta_{21+i}I(\text{Hour}_t=i) + \sum_{h=1}^{9}\sum_{i=1}^{23}\beta_{44+ih}I(\text{Hour}_t=i)I(10h\leq\text{Humidity}_{st}< 10(h+1)) + \sum_{i=1}^9\beta_{207+i}I(\text{Hour}_t=i)I(\text{Day}_t=\text{Holiday}) + \\\beta_{217}\text{Temperature}_{st}\text{DewPointTemp}_{st} + \beta_{218}ln(\text{WindSpeed}_{st}+1)I(\text{Day}_t=\text{Holiday}_{st}) + \beta_{218}\text{SolarRadiation}_{st}\text{Rainfall}_{st} + \beta_{219}\text{SolarRadiation}_{st}I(\text{Day}_t=\text{Holiday}_{st}) + \beta_{220}\text{Snowfall}_{st}I(\text{ExtremeWind}_{st} = 1)+\\\beta_{221}\text{Temperature}_{st}I(\text{Hour}_t=1)+\beta_{222}\text{Temperature}_{st}I(\text{Hour}_t=7)+\beta_{223}\text{Temperature}_{st}I(\text{Hour}_t=18)+\beta_{224}ln(\text{WindSpeed}_{st}+1)I(\text{Hour}_t=1)+\beta_{225}ln(\text{WindSpeed}_{st}+1)I(\text{Hour}_t=3)+\beta_{226}ln(\text{WindSpeed}_{st}+1)I(\text{Hour}_t=11)+\\\beta_{227}ln(\text{WindSpeed}_{st}+1)I(\text{Hour}_t=18) \beta_{228}ln(\text{Visibility}_{st}+1)I(\text{Hour}_t=2)+...+\beta_{230}ln(\text{Visibility}_{st}+1)I(\text{Hour}_t=4)+\beta_{231}ln(\text{Visbility}_{st}+1)I(\text{Hour}_t=11)+\beta_{232}\text{DewPointTemp}_{st}I(\text{Hour}_t=5)+\beta_{233}\text{DewPointTemp}_{st}I(\text{Hour}_t=8)+\\\beta_{234}\text{DewPointTemp}_{st}I(\text{Hour}_t=11)+\beta_{235}\text{DewPointTemp}_{st}I(\text{Hour}_t=16)+\beta_{236}\text{DewPointTemp}_{st}I(\text{Hour}_t=17)+\beta_{237}\text{DewPointTemp}_{st}I(\text{Hour}_t=19)+...+\beta_{239}\text{DewPointTemp}_{st}I(\text{Hour}_t=21)+\beta_{240}\text{SolarRadiation}_{st}I(\text{Hour}_t=8)+\\\beta_{241}\text{SolarRadiation}_{st}I(\text{Hour}_t=19)+\beta_{242}\text{Rainfall}_{st}I(\text{Hour}_t=9)+\beta_{243}\text{Rainfall}_{st}I(\text{Hour}_t=13)+\beta_{244}\text{Rainfall}_{st}I(\text{Hour}_t=17)+\beta_{245}\text{Rainfall}_{st}I(\text{Hour}_t=19)+\beta_{246}\text{Rainfall}_{st}I(\text{Hour}_t=20)+\beta_{247}\text{Snowfall}_{st}I(\text{Hour}_t=7)+\beta_{248}\text{Snowfall}_{st}I(\text{Hour}_t=9)+\beta_{249}\text{Snowfall}_{st}I(\text{Hour}_t=13)+\\\beta_{250}I(\text{ExtremeWind}_{st}=1)I(\text{Hour}_t=8)+\beta_{251}I(\text{ExtremeWind}_{st}=1)I(\text{Hour}_t=18)+\beta_{252}I(\text{ExtremeWind}_{st}=1)I(\text{Hour}_t=19)+\beta_{253}ln(\text{WindSpeed}_{st}+1)I(\text{Season}_s=\text{Winter})+\beta_{254}ln(\text{Visibility}_{st}+1)I(\text{Season}_s=\text{Winter})+\beta_{255}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Summer})+\\\beta_{256}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Autumn})+\beta_{257}\text{Rainfall}_{st}I(\text{Season}_s=\text{Winter})+\sum_{i=1}^{23}\sum_{\text{All } j \in \text{Seasons, }j\neq\text{Spring}}\beta_{257+i*jth\text{ Season}}I(\text{Hour}_t=i)I(\text{Season}_s=j)+\sum_{i=i}^{3}\beta_{327+i}I(60+10i\leq\text{Humidity}_{st}<60+10(i+1))I(\text{Season}_s=\text{Autumn})+\\\beta_{331}I(60\leq\text{Humidity}_{st}<70)I(\text{Season}_s=\text{Summer})+\beta_{332}\text{Temperature}_{st}I(20\leq\text{Humidity}_{st}<30)+\beta_{333}ln(\text{WindSpeed}_{st}+1)I(90\leq\text{Humidity}_{st}<100)+\beta_{334}\text{SolarRadiation}_{st}I(60\leq\text{Humidity}_{st}<70)+\sum_{i=1}^{4}\beta_{335+i}\text{SolarRadiation}_{st}I(50+10i\leq\text{Humidity}_{st}<60+10(i+1))+\\\sum_{i=1}^{3}\beta_{339+i}\text{Rainfall}_{st}I(30+10i\leq\text{Humidity}_{st}<30+10(i+1))+\beta_{343}\text{Rainfall}_{st}I(90\leq\text{Humidity}_{st}<100)+\beta_{344}I(\text{ExtremeWind}_{st}=1)I(30\leq\text{Humidity}_{st}<40)+\beta_{345}I(\text{ExtremeWind}_{st}=1)I(60\leq\text{Humidity}_{st}<70)+\beta_{346}I(\text{ExtremeWind}_{st}=1)I(70\leq\text{Humidity}_{st}<80)+\\\sum_{p=1}^{9}\delta_p\text{RentedBikeCount}_{st-p} + \sum_{p=1}^{9}\sum_{t=1}^{23}\delta_{9+pt}\text{RentedBikeCount}_{st-p}I(\text{Hour}_t=t) +  \sum_{p=1}^{9}\sum_{i=1}^{9}\delta_{216+ip}\text{RentedBikeCount}_{st-p}I(10i < \text{Humidity}_{st} \leq10(i+1)) +\\ \delta_{298}\text{RentedBikeCount}_{st-1}I(\text{Season}_s=\text{Autumn})+\delta_{299}\text{RentedBikeCount}_{st-3}I(\text{Season}_s=\text{Summer})+\delta_{300}\text{RentedBikeCount}_{st-6}I(\text{Season}_s=\text{Summer})+\delta_{301}\text{RentedBikeCount}_{st-9}I(\text{Season}_s=\text{Autumn})+\\\delta_{302}\text{RentedBikeCount}_{st-2}\text{RentedBikeCount}_{st-5}+\delta_{303}\text{RentedBikeCount}_{st-2}\text{RentedBikeCount}_{st-6}+\delta_{304}\text{RentedBikeCount}_{st-5}I(\text{ExtremeWind}_{st} = 1) + \delta_{305}\text{RentedBikeCount}_{st-1}\text{Temperature}_{st} + \\\delta_{306}\text{RentedBikeCount}_{st-1}ln(\text{WindSpeed}_{st}+1)+\delta_{307}\text{RentedBikeCount}_{st-9}ln(\text{WindSpeed}_{st}+1)+\delta_{308}\text{RentedBikeCount}_{st-1}ln(\text{Visibility}_{st}+1)+\delta_{309}\text{RentedBikeCount}_{st-1}\text{SolarRadiation}_{st}+\delta_{310}\text{RentedBikeCount}_{st-9}\text{SolarRadiation}_{st}+\\\delta_{311}\text{RentedBikeCount}_{st-1}\text{Rainfall}_{st}+\delta_{312}\text{RentedBikeCount}_{st-3}\text{Rainfall}_{st}+\delta_{313}\text{RentedBikeCount}_{st-8}\text{Rainfall}_{st}+\delta_{314}\text{RentedBikeCount}_{st-9}\text{Snowfall}_{st}+\eta_{st}$
+
+$\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
+
+NOTE: Not all paramenter coefficients are estimated to be > 0. See model output to see which coefficients.
+
+#### A.14 {#a14}
+
+Model Output for Model 4
+
+```{r}
+summary(seoul.bike.elastic)
 ```
