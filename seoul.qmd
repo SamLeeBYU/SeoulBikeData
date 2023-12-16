@@ -3,6 +3,7 @@ title: "Seasonality in Seoul: Multilinear Modeling with Kth Differences and Fixe
 author: "Ketherine Wang, Sam Lee"
 format: pdf
 editor: visual
+fontsize: 9pt
 header-includes:
   - \usepackage{amsmath}
 ---
@@ -62,7 +63,7 @@ seoul <- read.csv("SeoulBikeData.csv", header=F, skip=1) %>% setNames(
 
 # Abstract
 
-In this analysis we explore which factors primarily drive short-run fluctuations as they depend on Seasonality. We examine the changes in temperature as well as the demand for bike rentals in Seoul, South Korea. We conducted multiple linear regression using weather predictors from 2018 hourly data. We found that the the marginal effect of solar radiation on temperature change was most significant from 8:00 PM to 9:00 PM. Additionally, the interaction effects of solar radiation had a negative affect on bike demand; however, the interaction effects during peak demand times (rush hour times, for example), proved to be significantly positive.
+In this analysis we explore which factors primarily drive short-run fluctuations as they depend on Seasonality. We examine the changes in temperature as well as the demand for bike rentals in Seoul, South Korea. We conducted multiple linear regression using weather predictors from 2018 hourly data. We found that the the marginal effect of solar radiation on temperature change was most significant from 8:00 PM to 9:00 PM. Additionally, the marginal effects of solar radiation had a negative affect on bike demand; however, the interaction effects during peak demand times (rush hour times, for example), proved to be significantly positive.
 
 # 1 Problem and Motivation
 
@@ -265,7 +266,7 @@ Thus, we wish to estimate,
 
 Where $\Delta\text{Temperature}_{st} = \text{Temperature}_{st} - \text{Temperature}_{t-5}$
 
-```{r message=F, echo=F, fig.width=16}
+```{r message=F, echo=F, fig.size=16}
 corrplot(cor(seoul.temp[seoul.change %>% 
          setdiff(str_c(time.dummies, "Change"))]), 
          type="upper")
@@ -273,10 +274,13 @@ corrplot(cor(seoul.temp[seoul.change %>%
 
 With our basic multilinear model (1) the correlation matrix indicates that there may be some potential multicolinearity between $\text{DewPointTempChange}_{st}$ and $\text{HumidityChange}_{st}$. For the most part, the indicators look good with changes in $\text{SolarRadiation}_{st}$ potentially affecting flucutations in temperature the most.
 
-```{r echo=F}
+Change in Temperature Across Hours of the Day by Season
+
+```{r echo=F, fig.width=4}
 seoul.temp %>% ggplot()+
   geom_point(aes(x=Hour, y=TemperatureChange), size=0.25)+
-  facet_grid(~Seasons)
+  facet_grid(~Seasons)+
+  ylab(expression(Delta~Temperature))
 ```
 
 According to our model, changes in temperature not only depend on temperature but also on season. While there are some general linear trends across some ranges of hours, the non-linearity of the hours in general with respect to temperature change led us to include indicators for each hour as specified in Model (1) using Hour 0 (12:00 a.m.) as our base year.
@@ -313,9 +317,7 @@ show_leverage = function(model){
 
 According to the model diagnostics [A.1.0](#a10), the linearity assumption seems to met (see [A.1](#a11) for added variable plots). Additionally, though there were some points moving the model away from homoskedasticity the $\sqrt{|\text{Standardized residuals}|)}$ vs. Fitted values Plot shows that homoskedasticity is roughly met. However, the normality assumption was blatantly violated so we considered adding in interaction terms.
 
-We used elastic net regression to select interaction terms to see if the influential points (and thus, Normality) could be remedied. We used elastic net regression over lasso regression due to the potential colinearity between $\text{HumidityChange}_{st}$ and other weather effects.
-
-(See [A.2.0](#a20) for model output)
+We used elastic net regression to select interaction terms to see if the influential points (and thus, Normality) could be remedied. We used elastic net regression over lasso regression due to the potential colinearity between $\text{HumidityChange}_{st}$ and other weather effects. (See [A.2.0](#a20) for model output)
 
 However, even with selected interaction terms included, Normality did not drastically improve (see [A.2.1](#a21) for QQ-Plot).
 
@@ -323,7 +325,9 @@ We considered transforming the model ([A.3](#a3)) to better meet Normality and s
 
 However, with large sample size ($n=8740$), Normality could be appealed to. The residuals do appear to be Normal, though extreme values cause deviations from Normality at the tails as seen in the QQ-plot. We considered alternatives to meeting the assumptions such as linear robust regression to reduce the weights of outliers. One alternative is further discussed in [A.4](#a4), where we considered estimating a model for each season.
 
-```{r echo=F}
+Histogram of Residuals from Elastic Net Regression
+
+```{r echo=F, fig.size=4, message=F}
 model.factors = setdiff(c(seoul.change, seoul.interaction), 
                         c(seoul.base, "TemperatureChange"))
 
@@ -342,8 +346,11 @@ seoul.elastic = lm(TemperatureChange ~ 0 + .,
                                        seoul.temp[c("TemperatureChange",
                                        elastic.factors)])
 
-seoul.elastic$residuals %>% 
-  hist(main="Histogram of Residuals from Elastic Net Regression", col="steelblue")
+ggplot()+
+  geom_histogram(aes(x=seoul.elastic$residuals), fill="steelblue")+
+  xlab("Reisduals")+
+  ylab("")+
+  theme_minimal()
 ```
 
 Since the histogram of the residuals appears Normal, aside from the extreme values at the tails, we will appeal to Normality due to the large sample size.
@@ -364,7 +371,9 @@ Similar to our model for temperature, we have unobserved seasonal effects in $\e
 threshold = 0.25
 seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
   geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip), size=0.25)+
-  facet_grid(~Seasons)
+  facet_grid(~Seasons)+
+  ylab("Rented Bike Demand")+
+  guides(color=guide_legend(title="Significant Precipitation"))
 ```
 Preliminary EDA shows that precipitation (rain and snow) will have a significant negative effect on rented bike demand.
 
@@ -426,28 +435,11 @@ seoul.bike.elastic = lm(RentedBikeCount ~ .,
 
 Using an elastic net regression method to determine once again the appropriate coefficients to include [A.11](#a11), we have determined our final model for measuring the demand for rented bikes in Seoul,
 
-(4) $\text{RentedBikeCount}_{st} = \beta_0 +...+ \beta_{11}\text{Rainfall}_{st} +...+\beta_{17}\text{SolarRadiation}_{st}+\beta_{19}I(\text{Season}_s = \text{Winter}) + \beta_{20}I(\text{Season}_s = \text{Summer}) + \beta_{21}I(\text{Season}_s = \text{Autumn}) + ...+\beta_{240}\text{SolarRadiation}_{st}I(\text{Hour}_t=8)+\beta_{241}\text{SolarRadiation}_{st}I(\text{Hour}_t=19)+\beta_{242}\text{Rainfall}_{st}I(\text{Hour}_t=9)+\beta_{243}\text{Rainfall}_{st}I(\text{Hour}_t=13)+\beta_{244}\text{Rainfall}_{st}I(\text{Hour}_t=17)+\beta_{245}\text{Rainfall}_{st}I(\text{Hour}_t=19)+\beta_{246}\text{Rainfall}_{st}I(\text{Hour}_t=20)+...+\beta_{255}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Summer})+\beta_{256}\text{SolarRadiation}_{st}I(\text{Season}_s=\text{Autumn})+\beta_{257}\text{Rainfall}_{st}I(\text{Season}_s=\text{Winter})+\sum_{i=1}^{23}\sum_{\text{All } j \in \text{Seasons, }j\neq\text{Spring}}\beta_{257+i*jth\text{ Season}}I(\text{Hour}_t=i)I(\text{Season}_s=j)+\sum_{i=i}^{3}\beta_{327+i}I(60+10i\leq\text{Humidity}_{st}<60+10(i+1))I(\text{Season}_s=\text{Autumn})+\beta_{331}I(60\leq\text{Humidity}_{st}<70)I(\text{Season}_s=\text{Summer})+\beta_{334}\text{SolarRadiation}_{st}I(60\leq\text{Humidity}_{st}<70)+\sum_{i=1}^{4}\beta_{335+i}\text{SolarRadiation}_{st}I(50+10i\leq\text{Humidity}_{st}<60+10(i+1))+\sum_{i=1}^{3}\beta_{339+i}\text{Rainfall}_{st}I(30+10i\leq\text{Humidity}_{st}<30+10(i+1))+\beta_{343}\text{Rainfall}_{st}I(90\leq\text{Humidity}_{st}<100)I(\text{Hour}_t=t) + \eta_{st}$
+(4) $\text{RentedBikeCount}_{st} = \beta_0 +...+ \beta_{11}\text{Rainfall}_{st} +...+\beta_{17}\text{SolarRadiation}_{st}+\beta_{19}I(\text{Season}_s = \text{Winter}) + \beta_{20}I(\text{Season}_s = \text{Summer}) + \beta_{21}I(\text{Season}_s = \text{Autumn}) + ...+\beta_{240}\text{SolarRadiation}_{st}I(\text{Hour}_t=8)+\beta_{241}\text{SolarRadiation}_{st}I(\text{Hour}_t=19)+\beta_{242}\text{Rainfall}_{st}I(\text{Hour}_t=9)+\beta_{243}\text{Rainfall}_{st}I(\text{Hour}_t=13)+\beta_{244}\text{Rainfall}_{st}I(\text{Hour}_t=17)+\beta_{245}\text{Rainfall}_{st}I(\text{Hour}_t=19)+\beta_{246}\text{Rainfall}_{st}I(\text{Hour}_t=20)+... + \eta_{st}$
 
 $\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
 
 (The full model is referenced in [A.13](#a13), only assailant terms are included for simplicity.
-
-```{r warning=F, echo=F}
-seoul.bike$PredictedBikeCount = predict(seoul.bike.elastic, seoul.bike)
-seoul.bike %>% 
-  ggplot()+
-  geom_line(aes(x=Time, y=RentedBikeCount, color="Actual"), alpha=1)+
-  geom_line(aes(x=Time, y=PredictedBikeCount,
-                color="Predicted"), alpha=0.3)+
-  facet_grid(~factor(seoul$Seasons, 
-                     levels=c("Winter", "Spring", "Summer", "Autumn")), 
-             scales="free_x")+
-  labs(title="Predicted Bike Demand in Seoul Over Time",
-       color=NULL)+
-  xlab("Time")+
-  ylab("Rented Bike Count")+
-  theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
-```
 
 #  Model 2 (Temperature Change) - Analyses, Results, and Interpretation
 
@@ -476,17 +468,14 @@ Based on the plots above, we conclude that most of the assumptions are met, expe
 #### Reduced Model Test - Elastic Net Model with Solar Radiation Factors vs. without Solar Radiation Factors
 
 ```{r}
-summary(seoul.elastic)
-
 sr.factors = model.factors[model.factors %>% str_detect("SolarRadiation")]
 
 seoul.elastic.reduced.factors = setdiff(model.factors, sr.factors)
 
 seoul.elastic.reduced = lm(TemperatureChange ~ 0 + ., 
                            seoul.temp[c(seoul.elastic.reduced.factors, "TemperatureChange")])
-summary(seoul.elastic.reduced)
 
-anova(seoul.elastic.reduced, seoul.elastic)
+# anova(seoul.elastic.reduced, seoul.elastic)
 ```
 
 #### 95% Confidence Interval of $\beta_5$ for Solar Radiation Change
@@ -498,9 +487,9 @@ conf_ints['SolarRadiationChange', ]
 
 Holding all else constant, We are 95% confident that the true estimated average temperature change in Seoul will be between 0.8726519 and 1.0023804 Celsius when additional one MJ/$m^2$ increase in solar radiation change. The 95% confidence interval of $\beta_5$ for solar radiation change does not include zero. It suggests that the effect of solar radiation change on the average temperature change is statistically significant. In other words, there is a significant association between these variables.
 
-#### 95% Prediction Interval (see A.15 {#a15})
+#### 95% Prediction Interval (see [A.15](#a15) for API code/data retrieval)
 
-```{r warning=F, echo=F}
+```{r warning=F, echo=F, fig.width=18}
 api_url <- "https://api.open-meteo.com/v1/forecast?latitude=37.566&longitude=126.9784&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,visibility,wind_speed_10m,diffuse_radiation&wind_speed_unit=ms&past_days=7"
 
 response <- GET(api_url)
@@ -566,6 +555,7 @@ p.change = forecast %>% ggplot(aes(x=Time, y=TemperatureChange, color=Forecast))
     title="Current Weekly Forecast of Change in Temperature in Seoul",
     subtitle = "Overlaid by Prediction"
   )+
+  guides(color="none")+
   theme_minimal()
 
 p.temp = forecast %>% ggplot(aes(x=Time, y=Temperature, color=Forecast))+
@@ -591,7 +581,7 @@ grid.arrange(p.change, p.temp, ncol=2)
 
 ```{r}
 autoplot(seoul.bike.elastic)
-shapiro.test(sample(seoul.bike,elastic$residuals, 5000))
+shapiro.test(sample(seoul.bike.elastic$residuals, 5000))
 show_leverage(seoul.bike.elastic)
 ```
 
@@ -602,6 +592,23 @@ conf_ints <- confint(seoul.bike.elastic, level = 0.95)
 
 solar_radiation_ci <- conf_ints['SolarRadiationXHour19', ]
 print(solar_radiation_ci)
+```
+
+```{r warning=F, echo=F}
+seoul.bike$PredictedBikeCount = predict(seoul.bike.elastic, seoul.bike)
+seoul.bike %>% 
+  ggplot()+
+  geom_line(aes(x=Time, y=RentedBikeCount, color="Actual"), alpha=1)+
+  geom_line(aes(x=Time, y=PredictedBikeCount,
+                color="Predicted"), alpha=0.3)+
+  facet_grid(~factor(seoul$Seasons, 
+                     levels=c("Winter", "Spring", "Summer", "Autumn")), 
+             scales="free_x")+
+  labs(title="Predicted Bike Demand in Seoul Over Time",
+       color=NULL)+
+  xlab("Time")+
+  ylab("Rented Bike Count")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
 ```
 
 ## APPENDIX
@@ -720,7 +727,7 @@ show_leverage(seoul.elastic)
 
 Transformations we considered for Model (1)
 
-```{r}
+```{r fig.size=8}
 factors.transform = c("HumidityChange", "DewPointTempChange", 
                       "SolarRadiationChange", "WindSpeedChange")
 
@@ -1156,7 +1163,7 @@ summary(seoul.bike.elastic)
 api_url <- "https://api.open-meteo.com/v1/forecast?latitude=37.566&longitude=126.9784&hourly=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,visibility,wind_speed_10m,diffuse_radiation&wind_speed_unit=ms&past_days=7"
 ```
 
-```{r warning=F}
+```{r warning=F, fig.width=18}
 response <- GET(api_url)
 fetch_time = ymd_h(paste(Sys.Date(), hour(now())))
 content <- content(response, "text", encoding = "UTF-8")
@@ -1220,6 +1227,7 @@ p.change = forecast %>% ggplot(aes(x=Time, y=TemperatureChange, color=Forecast))
     title="Current Weekly Forecast of Change in Temperature in Seoul",
     subtitle = "Overlaid by Prediction"
   )+
+  guides(color="none")+
   theme_minimal()
 
 p.temp = forecast %>% ggplot(aes(x=Time, y=Temperature, color=Forecast))+
