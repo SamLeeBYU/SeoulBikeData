@@ -1,11 +1,11 @@
 ---
 title: "Seasonality in Seoul: Multilinear Modeling with Kth Differences and Fixed Effects"
-author: "Ketherine Wang, Sam Lee"
+author:
+  - "Ketherine Wang"
+  - "Sam Lee"
 format: pdf
 editor: visual
 fontsize: 9pt
-header-includes:
-  - \usepackage{amsmath}
 ---
 
 ```{=html}
@@ -256,7 +256,7 @@ seoul = create_interaction_terms(seoul)
 seoul[complete.cases(seoul[seoul.change]), ] -> seoul.temp
 ```
 
-## Regression Methods & Model Determination
+## 1.3 Regression Methods & Model Determination/Selection Procedures
 
 We decided to run a first differences model to model the fluctuations in short-run temperature. where $\Delta\text{Temperature}_t = \text{Temperature}_t - \text{Temperature}_{t-k}$. We found that the optimal choice of $k$ was $5$ (see [A.0](#a0) for optimal selection process on $k$).
 
@@ -276,7 +276,7 @@ With our basic multilinear model (1) the correlation matrix indicates that there
 
 Change in Temperature Across Hours of the Day by Season
 
-```{r echo=F, fig.width=4}
+```{r echo=F, fig.width=12}
 seoul.temp %>% ggplot()+
   geom_point(aes(x=Hour, y=TemperatureChange), size=0.25)+
   facet_grid(~Seasons)+
@@ -315,59 +315,13 @@ show_leverage = function(model){
 }
 ```
 
-According to the model diagnostics [A.1.0](#a10), the linearity assumption seems to met (see [A.1](#a11) for added variable plots). Additionally, though there were some points moving the model away from homoskedasticity the $\sqrt{|\text{Standardized residuals}|)}$ vs. Fitted values Plot shows that homoskedasticity is roughly met. However, the normality assumption was blatantly violated so we considered adding in interaction terms.
+<!-- According to the model diagnostics [A.1.0](#a10), the linearity assumption seems to met (see [A.1](#a11) for added variable plots). Additionally, though there were some points moving the model away from homoskedasticity the $\sqrt{|\text{Standardized residuals}|)}$ vs. Fitted values Plot shows that homoskedasticity is roughly met. However, the normality assumption was blatantly violated so we considered adding in interaction terms. -->
 
 We used elastic net regression to select interaction terms to see if the influential points (and thus, Normality) could be remedied. We used elastic net regression over lasso regression due to the potential colinearity between $\text{HumidityChange}_{st}$ and other weather effects. (See [A.2.0](#a20) for model output)
-
-However, even with selected interaction terms included, Normality did not drastically improve (see [A.2.1](#a21) for QQ-Plot).
-
-We considered transforming the model ([A.3](#a3)) to better meet Normality and somewhat homoskedasticity. However, due to the nature of our $X$ variable matrix--since each independent variable is a change in a variable, we thus had to shift the entire vector of that corresponding variable in order to derive optimal transformations. Hence, interpreting the any transformations we would make would prove difficult and impractical.
-
-However, with large sample size ($n=8740$), Normality could be appealed to. The residuals do appear to be Normal, though extreme values cause deviations from Normality at the tails as seen in the QQ-plot. We considered alternatives to meeting the assumptions such as linear robust regression to reduce the weights of outliers. One alternative is further discussed in [A.4](#a4), where we considered estimating a model for each season.
-
-Histogram of Residuals from Elastic Net Regression
-
-```{r echo=F, fig.size=4, message=F}
-model.factors = setdiff(c(seoul.change, seoul.interaction), 
-                        c(seoul.base, "TemperatureChange"))
-
-seoul.x = as.matrix(seoul.temp[model.factors])
-seoul.y = as.matrix(seoul.temp["TemperatureChange"])
-
-elastic_cv <- cv.glmnet(x = seoul.x,
-                      y = seoul.y, 
-                      type.measure = "mse", 
-                      alpha = 0.5)
-
-d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
-elastic.factors = c(model.factors[which(d != 0)])
-elastic.factors = c(elastic.factors, setdiff(c(str_c(time.bike, "Change"), "RainfallChange"), elastic.factors))
-seoul.elastic = lm(TemperatureChange ~ 0 + .,
-                                       seoul.temp[c("TemperatureChange",
-                                       elastic.factors)])
-
-ggplot()+
-  geom_histogram(aes(x=seoul.elastic$residuals), fill="steelblue")+
-  xlab("Reisduals")+
-  ylab("")+
-  theme_minimal()
-```
-
-Since the histogram of the residuals appears Normal, aside from the extreme values at the tails, we will appeal to Normality due to the large sample size.
-
-Additionally, diagnostics ([A.2.1](#a21)) show that there no undully outliers, and linearity and homoskedasticity are met.
-
-Thus, using our elastic regression results, we will modify Model (1) to include the following interaction terms. We made sure to include the lower-order regression coefficients for the coefficients that elastic net regression left out when elastic net included interaction terms involving a lower-order term. We are interested in estimating the most assailant factors ([A.5](#a5)). See [A.6](#a6) for the full model.
-
-(2) $\Delta\text{Temperature}_{st} = ... + \beta_5\Delta\text{SolarRadiation}_{st} + ... +  \beta_{32}\Delta\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \beta_{39}\Delta\text{SolarRadiation}_{st}\text{Rainfall}_{st} + ... + \sum_{n=1}^{23}{\beta_{131+n}\Delta\text{SolarRadiation}_{st}\Delta I(\text{Hour}_t=n)} + ... + \Delta\eta_{st}$
-
-$\Delta\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
-
 ---
-
 Similar to our model for temperature, we have unobserved seasonal effects in $\epsilon$. Instead of using a $k$th-difference approach, we will use a fixed effects models to include the seasonal effects for $s-1$ (3) seasons to obtain unbiased estimates. We will use Spring as our base season. However, exploratory data analysis has shown that current bike demand is strongly dependent on the bike demand from previous hours. Hence, in order to include seasonal dummy variables, we also need to include a set of lagged effects ($\delta_{p}$) conditional on Season on $\text{RentedBikeCount}_{st} \quad \forall s \in \text{Seasons}, s\neq\text{Spring}$ to adjust for the time dependency. (See [A.7](#a7) to see how we chose our set of lagged effects).
 
-```{r echo=F, figsize=6}
+```{r echo=F, fig.width=12}
 threshold = 0.25
 seoul %>% mutate(IsPrecip=(Rainfall+Snowfall) > threshold) %>% ggplot()+
   geom_point(aes(x=Hour, y=RentedBikeCount, color=IsPrecip), size=0.25)+
@@ -431,7 +385,17 @@ elastic.bike.factors = c(elastic.bike.factors,
 seoul.bike.elastic = lm(RentedBikeCount ~ .,
                                        seoul.bike[c("RentedBikeCount",
                                        elastic.bike.factors)])
+
+autoplot(seoul.bike.elastic)
 ```
+
+## 4. Analyses, Results and Interpretation:
+
+Thus, using our elastic regression results, we will modify Model (1) to include the following interaction terms. We made sure to include the lower-order regression coefficients for the coefficients that elastic net regression left out when elastic net included interaction terms involving a lower-order term. We are interested in estimating the most assailant factors ([A.5](#a5)). See [A.6](#a6) for the full model.
+
+(2) $\Delta\text{Temperature}_{st} = ... + \beta_5\Delta\text{SolarRadiation}_{st} + ... +  \beta_{32}\Delta\text{Humidity}_{st}\text{SolarRadiation}_{st} + ... + \beta_{39}\Delta\text{SolarRadiation}_{st}\text{Rainfall}_{st} + ... + \sum_{n=1}^{23}{\beta_{131+n}\Delta\text{SolarRadiation}_{st}\Delta I(\text{Hour}_t=n)} + ... + \Delta\eta_{st}$
+
+$\Delta\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
 
 Using an elastic net regression method to determine once again the appropriate coefficients to include [A.11](#a11), we have determined our final model for measuring the demand for rented bikes in Seoul,
 
@@ -441,42 +405,84 @@ $\eta_{st} \overset{iid}{\sim} N(0, \sigma^2)$
 
 (The full model is referenced in [A.13](#a13), only assailant terms are included for simplicity.
 
-#  Model 2 (Temperature Change) - Analyses, Results, and Interpretation
+#### Diagonostic Checks
 
-## Analysis Details
+For both models, model (2) (Temperature Change) and model (4) (Bike Sharing Demand),
 
-### Diagonostic Checks
+Based on the Residuals vs. Fitted Values plot below, the linearity assumption appears to be met. There is a straight blue curve across most of the fitted values with majority of the residuals randomly distributed around the horizontal line at y = 0.
+
+From the Normal Q-Q plot below, the plot shows that the points deviate from the reference line, especially in the tails. This suggests that the data may have heavier tails than a normal distribution, indicating the presence of outliers or a non-normal distribution of residuals.
+
+However, even with selected interaction terms included, Normality did not drastically improve (see [A.2.1](#a21) for QQ-Plot).
+
+We considered transforming the model (1) ([A.3](#a3)) to better meet normality and somewhat homoskedasticity. However, due to the nature of our $X$ variable matrix, since each independent variable is a change in a variable, we thus had to shift the entire vector of that corresponding variable in order to derive optimal transformations. Hence, interpreting any transformations we would make would prove difficult and impractical.
+
+However, with large sample size ($n=8740$), normality could be appealed to. The residuals do appear to be normal, though extreme values cause deviations from normality in the tails as seen in the Normal Q-Q plot. We considered alternatives to meeting the assumptions such as linear robust regression to reduce the weights of outliers. One alternative is further discussed in [A.4](#a4), where we considered estimating a model for each season.
+
+Histogram of Residuals from Elastic Net Regression
+
+```{r echo=F, fig.width=18, message=F}
+model.factors = setdiff(c(seoul.change, seoul.interaction), 
+                        c(seoul.base, "TemperatureChange"))
+
+seoul.x = as.matrix(seoul.temp[model.factors])
+seoul.y = as.matrix(seoul.temp["TemperatureChange"])
+
+elastic_cv <- cv.glmnet(x = seoul.x,
+                      y = seoul.y, 
+                      type.measure = "mse", 
+                      alpha = 0.5)
+
+d = coef(elastic_cv, s = "lambda.1se")[2:(length(model.factors)-1)]
+elastic.factors = c(model.factors[which(d != 0)])
+elastic.factors = c(elastic.factors, setdiff(c(str_c(time.bike, "Change"), "RainfallChange"), elastic.factors))
+seoul.elastic = lm(TemperatureChange ~ 0 + .,
+                                       seoul.temp[c("TemperatureChange",
+                                       elastic.factors)])
+
+elastic.hist = ggplot()+
+  geom_histogram(aes(x=seoul.elastic$residuals), fill="steelblue")+
+  xlab(expression("Reisduals of "~Delta~Temp~" Model"))+
+  ylab("")+
+  theme_minimal()
+
+elastic.hist.bike = ggplot()+
+  geom_histogram(aes(x=seoul.elastic$residuals), fill="coral")+
+  xlab("Reisduals of Bike Demand Model")+
+  ylab("")+
+  theme_minimal()
+
+
+grid.arrange(elastic.hist, elastic.hist.bike, ncol=2)
+```
+Since the histogram of the residuals above appears to be normal, aside from the extreme values in the tails in the Normal Q-Q plot, it is important to note that with large datasets, such as ours, the central limit theorem suggests that the sampling distribution of the regression coefficients will tend to be normally distributed, even if the residuals are not. This implies that the violation of the normality assumption may not substantially affect the validity of our inferential statistics, like confidence intervals and hypothesis tests..
+
+Additionally, the homoscedasticity assumption appears to be met. In the Scale-Location plot ([A.2.1](#a21)), there is a straight and horizontal blue curve for most of the fitted values. The points are evenly spread out above and below the curve. Even though there is a slight curvature in the blue line shown in the plot due to effects of some outliers, overall, I think that the homoscedasticity assumption is met.
+
+Lastly, from the Residuals vs. Leverage plot ([A.2.1](#a21)), none of the standardized residuals falls outside the 0.5 Cook's distance thresholds. Therefore, we can conclude that there is no unduly influential points.
 
 ```{r}
 autoplot(seoul.elastic)
-shapiro.test(sample(seoul.elastic$residuals, 5000))
 show_leverage(seoul.elastic)
+
+autoplot(seoul.bike.elastic)
+show_leverage(seoul.bike.elastic)
 ```
-
-In the residuals vs. fitted values plot, there is a straight blue curve for most of the fitted values with the vast majority of the residuals centered around the horizontal line at y = 0. Therefore, we think that the linearity assumption is met.
-
-From the normal Q-Q plot and the Shapiro-Wilk normality test above, we are able to see that the standardized residuals on the tails do not fall on the dashed line, and with a p-value less than 2.2e-16 which is extremely small and less than the significance level of $\alpha = 0.05$, we reject the null hypothesis, and there is sufficient evidence to conclude that the residuals are not normally distributed.
-
-In the scale-location plot, we can see a straight and horizontal blue curve for most of the fitted values. Even though there is a slight curvature in the blue line shown in the plot, overall, I think that the homoscedasticity assumption is met.
-
-From the residuals vs. leverage plots, we are able to see that none of the standardized residuals falls outside the 0.5 Cook's distance thresholds. Therefore, we can conclude that there is no unduly influential points.
-
-Based on the plots above, we conclude that most of the assumptions are met, expect that we observed that the assumption of normality in the residuals of our multiple linear regression model is not fully met. However, it is important to note that with large datasets, such as ours, the central limit theorem suggests that the sampling distribution of the regression coefficients will tend to be normally distributed, even if the residuals are not. This implies that the violation of the normality assumption may not substantially affect the validity of our inferential statistics, like confidence intervals and hypothesis tests.
 
 ### Inferential Statistics
 
-#### Reduced Model Test - Elastic Net Model with Solar Radiation Factors vs. without Solar Radiation Factors
+<!-- #### Reduced Model Test - Elastic Net Model with Solar Radiation Factors vs. without Solar Radiation Factors -->
 
-```{r}
-sr.factors = model.factors[model.factors %>% str_detect("SolarRadiation")]
+<!-- ```{r} -->
+<!-- sr.factors = model.factors[model.factors %>% str_detect("SolarRadiation")] -->
 
-seoul.elastic.reduced.factors = setdiff(model.factors, sr.factors)
+<!-- seoul.elastic.reduced.factors = setdiff(model.factors, sr.factors) -->
 
-seoul.elastic.reduced = lm(TemperatureChange ~ 0 + ., 
-                           seoul.temp[c(seoul.elastic.reduced.factors, "TemperatureChange")])
+<!-- seoul.elastic.reduced = lm(TemperatureChange ~ 0 + .,  -->
+<!--                            seoul.temp[c(seoul.elastic.reduced.factors, "TemperatureChange")]) -->
 
-# anova(seoul.elastic.reduced, seoul.elastic)
-```
+<!-- # anova(seoul.elastic.reduced, seoul.elastic) -->
+<!-- ``` -->
 
 #### 95% Confidence Interval of $\beta_5$ for Solar Radiation Change
 
@@ -485,7 +491,18 @@ conf_ints <- confint(seoul.elastic, level = 0.95)
 conf_ints['SolarRadiationChange', ]
 ```
 
-Holding all else constant, We are 95% confident that the true estimated average temperature change in Seoul will be between 0.8726519 and 1.0023804 Celsius when additional one MJ/$m^2$ increase in solar radiation change. The 95% confidence interval of $\beta_5$ for solar radiation change does not include zero. It suggests that the effect of solar radiation change on the average temperature change is statistically significant. In other words, there is a significant association between these variables.
+Holding all else constant, we are 95% confident that the true estimated average temperature change in Seoul will be between 0.8726519 and 1.0023804 Celsius when additional one MJ/$m^2$ increase in solar radiation change. The 95% confidence interval of $\beta_5$ for solar radiation change does not include zero. It suggests that the effect of solar radiation change on the average temperature change is statistically significant. In other words, there is a significant association between these variables.
+
+#### 95% Confidence Interval of $\beta_241$ for Solar Radiation at Hour 19
+
+```{r}
+conf_ints <- confint(seoul.bike.elastic, level = 0.95)
+
+solar_radiation_ci <- conf_ints['SolarRadiationXHour19', ]
+print(solar_radiation_ci)
+```
+
+Holding all else constant, we are 95% confident that the true estimated bike sharing demand in Seoul will be between 0.8726519 and 1.0023804 Celsius when additional one MJ/$m^2$ increase in solar radiation change. The 95% confidence interval of $\beta_5$ for solar radiation change does not include zero. It suggests that the effect of solar radiation change on the average temperature change is statistically significant. In other words, there is a significant association between these variables.
 
 #### 95% Prediction Interval (see [A.15](#a15) for API code/data retrieval)
 
@@ -571,27 +588,11 @@ p.temp = forecast %>% ggplot(aes(x=Time, y=Temperature, color=Forecast))+
   theme_minimal()
 
 grid.arrange(p.change, p.temp, ncol=2)
-```
 
-#  Model 4 (Bike Sharing Demand) - Analyses, Results, and Interpretation
-
-## Analysis Details
-
-### Diagonostic Checks
-
-```{r}
-autoplot(seoul.bike.elastic)
-shapiro.test(sample(seoul.bike.elastic$residuals, 5000))
-show_leverage(seoul.bike.elastic)
-```
-
-#### 95% Confidence Interval of $\beta_5$ for Solar Radiation Change
-
-```{r}
-conf_ints <- confint(seoul.bike.elastic, level = 0.95)
-
-solar_radiation_ci <- conf_ints['SolarRadiationXHour19', ]
-print(solar_radiation_ci)
+predict(seoul.elastic,
+        newdata = tail(forecast, 5)[1,],
+        interval = "prediction",
+        level = 0.95)
 ```
 
 ```{r warning=F, echo=F}
@@ -610,6 +611,19 @@ seoul.bike %>%
   ylab("Rented Bike Count")+
   theme(axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0))
 ```
+## 5. Conclusions
+
+For temperature changes, our multilinear model suggests a significant correlation with solar radiation, particularly during evening hours. The confidence interval for the effect of solar radiation on temperature change does not include zero, indicating a substantial impact. Interestingly, while solar radiation generally increased temperature, its interaction with other factors like rainfall showed a negative effect on bike demand, except during peak hours where the effect was positive. This nuanced relationship highlights the complexity of weather's impact on urban activities.
+
+Regarding bike-sharing demand, our analysis revealed strong seasonality and time dependencies. Notably, humidity and solar radiation played significant roles, with solar radiation's impact on demand varying by hour and season. The confidence interval for the interaction between solar radiation and bike-sharing demand at 7 PM underlines this point, demonstrating a significant effect during this time.
+
+<!-- The diagnostic checks for our models confirmed the assumptions of linearity and homoskedasticity were mostly met, with the exception of normality due to extreme values. The large sample size allowed us to appeal to the central limit theorem for the normality of our regression coefficients, despite the residuals' deviation from normality. -->
+
+Given that we controlled for time-series independence using regression techniques such as kth-differences and fixed effects, our findings are believed to be reliable within the context of Seoul's climate and urban dynamics. While the results are specific to Seoul, they may also provide valuable insights for similar metropolitan areas with comparable climates and bike-sharing systems. However, caution should be exercised when generalizing beyond these conditions.
+
+In conclusion, the study's results offers a deeper understanding of the intricate interplay between weather conditions, time factors, and urban mobility in Seoul. This information is crucial for city planners and policymakers aiming to promote sustainable transportation and urban living. Further research could explore these relationships in different contexts or extend the analysis to other forms of urban mobility.
+
+## 6. Contributions
 
 ## APPENDIX
 
@@ -623,7 +637,7 @@ Since we have hourly data, running a first difference regression model will, tho
 
 We want $k$ as small as possible because we want as much data for our model: Our belief is that short-run fluctuations in temperature can be determined by other short-run changes in other factors. Hence, the smaller $k$ is, the better predictions we can make about the hour $t$. If we wanted to parse out a long-run effect, we would aggregate on a time period and regress over that interval. However, for the purposes of our research question, we need to be informed the most about what is happening in the short-run.
 
-Running a $k$th difference regression model where $\Delta\text{Temperature}_t = \text{Temperature}_t - \text{Temperature}_{t-k}$ we can find a sufficient $k$ by regressing $\Delta\text{Temperature}_{t-1}$ on $\Delta\text{Temperature}_{t-k^*}$, where $k*$ is the proposed value of $k$. We will choose $k=k^*$ when the regression coefficient becomes non-significant. This (non-coincidentally) happens as the regression coefficient approaches 0, or as $\Delta\text{Temperature}_t$ becomes less and less dependent of the $\Delta\text{Temperature}$ from $k^*$ hours ago.
+Running a $k$th difference regression model where $\Delta\text{Temperature}_t = \text{Temperature}_t - \text{Temperature}_{t-k}$ we can find a sufficient $k$ by regressing $\Delta\text{Temperature}_{t-1}$ on $\Delta\text{Temperature}_{t-k^*}$, where $k*$ is the proposed value of $k$. We will choose $k=k^*$ when the regression coefficient becomes non-significant. This (non-coincidentally) happens as the regression coefficient approaches 0, or $\Delta\text{Temperature}_t$ becomes less and less dependent of the $\Delta\text{Temperature}$ from $k^*$ hours ago.
 
 The optimal choice of $k$ will lead us to run a $k$th difference regression model where $\Delta\text{Temperature}_t = \text{Temperature}_t - \text{Temperature}_{t-k}$.
 
@@ -686,7 +700,7 @@ avPlots(seoul.lm)
 
 Elastic Net Regression on Model (1) w/ interaction terms
 
-```{r}
+```{r eval=F}
 model.factors = setdiff(c(seoul.change, seoul.interaction), 
                         c(seoul.base, "TemperatureChange"))
 
@@ -921,7 +935,6 @@ for(season in seoul$Seasons %>% unique()){
 ```
 
 Since Spring is our base season, we will include $p=9$ lagged effects for $\text{RentedBikeCount}_{st}$ in the base model, and since no other season has $p > 9$, we do not need any other lagged effects dependent on season.
-
 
 #### A.8.0 {#a80}
 
